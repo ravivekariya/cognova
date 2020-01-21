@@ -1,0 +1,73 @@
+.login-container h2{font-size:21px !important;}
+.plus{cursor:pointer;}
+
+
+/***** Start Add Order form *****/
+.divTotal .control-group{border-bottom:1px dotted #e2e2e2; margin-bottom:0px; padding-top:5px;}
+.divTotal .controls{padding-right:15px;}
+.divTotal .controls label{float:right; text-align:right;}
+.div-final-total{background:#f7f7f7 none repeat scroll 0 0;}
+
+#invDetails .infobox-custom{width:auto !important; min-width:100px; margin:0px 5px 0px 0px !important;}
+#invDetails .infobox-data-custom{min-width:0px !important;}
+#invStageDetails .span-inv-box{float:right; margin-right:10px;}
+#invStageDetails span{width:auto;}
+/***** End Addd Order form *****/
+
+/**** start info box ****/
+#divInventoryRes .infobox-custom{width:auto !important; min-width:100px; margin:0px 5px 0px 0px !important;}
+#divInventoryRes .infobox-data-custom{min-width:0px !important;}
+#divInventoryStageRes .span-inv-box{float:right; margin-right:10px;}
+/**** start info box ****/
+
+/**** Start Assign Process to product ****/
+#chk_prod_typ label{float:left; margin:0px 10px 10px 0;}
+/**** End Assign Process to product ****/
+
+/**** Start Check inventory box ****/
+#radio_prod_typ label{float:left; margin:0px 10px 10px 0;}
+/**** End Check inventory box ****/
+
+/***** Customer Modal Form ****/
+#cust-form.modal{left:39% !important; width:850px !important; top:0 !important;}
+#cust-form.modal .modal-body{max-height:none;}
+/***** Customer Modal Form ****/
+
+/***** Inventory Take In Modal Form ****/
+#inv-form.modal{left:42% !important; width:750px !important;}
+#inv-form.modal .modal-body{max-height:none;}
+table#tblStgInvOrderList input[type="text"]{font-size: 12px;height: 23px !important;margin-bottom: 0;min-height: unset;}
+#frmTakeIn{margin:0 !important;}
+/***** Inventory Take In Form ****/
+
+/*** Start Check Order Form ***/
+.product-grid-head {border-bottom:1px dotted lightgray; padding:10px 0 2px;}
+.product-grid-head div{padding:0 5px;}
+.product-grid-body {border-bottom:1px dotted lightgray; padding:10px 0 2px;}
+.product-grid-body div{padding:0 5px;}
+/*** End Check Order Form ***/
+
+/*** Start General CSS ***/
+.rmargin5 {margin:0 5px !important;}
+/*** End General CSS
+
+/*** Start css for customer popup ***/
+#chk-cust-copy-addr{float:right; margin-right:20px; color:#000;}
+#frmCustomer{margin:0 !important;}
+/*** End css for customer popup ***/
+
+/*** START CSS FOR VIEW CLIENT ORDER ***/
+.view-order .invoice-info-label{max-width:none !important; width:120px;}
+.div-icons a {margin:0 5px !important; vertical-align:middle;}
+.view-order .table td,.view-order .table th {line-height:10px;}
+.view-order .declaration ol{margin-left:11px;}
+.view-order .declaration li{font-size:11px;}
+#div-order-stage{margin-bottom:10px;}
+#div-order-stage li{text-align:left;}
+/*** END CSS FOR VIEW CLIENT ORDER ***/
+
+/*** START CSS FOR ORDER LIST ***/
+#tbl-order-list .progress{margin-bottom:0;}
+#tbl-order-list .progress[data-percent]::after{font-size:9px !important;}
+/*** END CSS FOR ORDER LIST ***/
+
