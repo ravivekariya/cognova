@@ -8,6 +8,7 @@ class invoice extends CI_Controller {
 		$this->load->model("order_model",'',true);
 		$this->load->model("vendor_model",'',true);
 		$this->load->model("invoice_model",'',true);
+		$this->load->model("Process_model",'process_model',true);
 		$this->load->model("page",'',true);
 		$this->load->library('My_PHPMailer');
 	}
@@ -38,6 +39,21 @@ class invoice extends CI_Controller {
 			$this->invoice_model->insert($arrData);
 		}
 
+		// generate process array
+        $searchCriteria = array();
+        $searchCriteria['selectField'] = 'pm.id, pm.name';
+        $this->process_model->searchCriteria = $searchCriteria;
+        $processArr = $this->process_model->getDetails();
+
+        $processA = [];
+        if(is_array($processArr) && count($processArr))
+        {
+            foreach ($processArr AS $record)
+            {
+                $processA[$record['id']] = $record['name'];
+            }
+        }
+
 		// Get Order Details
 		$searchCriteria = array();
 		$searchCriteria['order_id'] = $orderId;
@@ -56,6 +72,7 @@ class invoice extends CI_Controller {
 		$vendorArr = $this->vendor_model->getVendor();
 		$rsListing['vendorArr'] = $vendorArr[0];
 		$rsListing['totalAmountInWords'] = $this->page->convert_digit_to_words($orderDetailArr['final_total_amount']);
+		$rsListing['processA'] = $processA;
 
 		if($isPdf != 1){
 			$this->load->view('invoice/viewInvoice', $rsListing);

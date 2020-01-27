@@ -149,7 +149,24 @@
                                         ?>
                                         <tr>
                                             <td align="center"><?php echo $cnt; ?></td>
-                                            <td><?php echo $prodRow["prod_name"];  ?></td>
+                                            <td>
+                                                <?php echo $prodRow["prod_name"];  ?>
+                                                <?php
+                                                    if(isset($prodRow['process_ids']) && $prodRow['process_ids'])
+                                                    {
+                                                        $processIdA = json_decode($prodRow['process_ids']);
+                                                        $i=1;
+                                                        echo '<span style="font-size:12px; display: block">';
+                                                        foreach ($processIdA AS $processId)
+                                                        {
+                                                            $concat = ($i > 1) ? ", ":"";
+                                                            echo $concat.$processA[$processId];
+                                                            $i++;
+                                                        }
+                                                        echo '</span>';
+                                                    }
+                                                ?>
+                                            </td>
                                             <td><?php echo $prodRow["prod_qty"];  ?></td>
                                             <td><?php echo $prodRow["weight_per_qty"];  ?></td>
                                             <td><?php echo $prodRow["prod_total_weight"];  ?></td>

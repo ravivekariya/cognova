@@ -55,7 +55,7 @@ class order extends CI_Controller {
 		{
 			// Get Order Details
 			$searchCriteria = array();
-			$searchCriteria['orderId'] = $orderId;
+			$searchCriteria['order_id'] = $orderId;
 			$searchCriteria['fetchProductDetail'] = 1;
 			$this->order_model->searchCriteria = $searchCriteria;
 			$orderDetailArr = $this->order_model->getOrderDetails();
@@ -109,7 +109,7 @@ class order extends CI_Controller {
 		$strAction = $this->Page->getRequest("hdnAction");
 		$orderId = $this->Page->getRequest("hdnOrderId");
 		$productArr = $_REQUEST["productArr"];
-		
+
 		$cnt = 0;
 		// Order Master Entry
 		$arrData = array();
@@ -156,6 +156,7 @@ class order extends CI_Controller {
 				$arrData['prod_qty'] = $arr['prodQty'];
 				$arrData['weight_per_qty'] = $arr['weightPerQty'];
 				$arrData['prod_total_weight'] = $arr['prodTotalWeight'];
+				$arrData['process_ids'] = (isset($arr['processIds']) && is_array($arr['processIds'])) ? json_encode($arr['processIds']) : null;
 
 				if($strAction == "A")
 				{

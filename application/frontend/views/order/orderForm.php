@@ -50,6 +50,7 @@
                                         <a id="" href="#prod-form" data-toggle="modal"> Add Product <i class="icon-plus"></i></a>
                                         <br/>Product Name
                                     </th>
+                                    <th class="span2">Process</th>
                                     <th class="span1">Quantity</th>
                                     <th class="span2">Weight</th>
                                     <th class="span1">Total weight</th>
@@ -62,6 +63,11 @@
                                     <td class="span2">
                                         <select class="form-control span12 product calc" name="selProduct" id="selProduct">
                                             <?php echo $this->Page->generateComboByTable("product_master","prod_id","prod_name","","where status='ACTIVE'","","Select Product"); ?>
+                                        </select>
+                                    </td>
+                                    <td class="span2">
+                                        <select class="form-control span12 product" name="selProcess" id="selProcess" multiple="" data-placeholder="Choose a Process...">
+                                            <?php echo $this->Page->generateComboByTable("process","id","name","","where status='ACTIVE'","",""); ?>
                                         </select>
                                     </td>
                                     <td class="span1">
@@ -84,6 +90,11 @@
 								{
 									foreach($prodDetailsArr AS $key=>$productRow)
 									{
+                                        $processIds = "";
+									    if($productRow['process_ids'])
+                                        {
+                                            $processIds = implode(",", json_decode($productRow['process_ids']));
+                                        }
 									?>
 										<tr class="entry" id="<?php echo $cnt; ?>">
 											<td class="span2">
@@ -91,6 +102,11 @@
                                                     <?php echo $this->Page->generateComboByTable("product_master","prod_id","prod_name","","where status='ACTIVE'",$productRow['prod_id'],"Select Product"); ?>
                                                 </select>
 											</td>
+                                            <td class="span2">
+                                                <select class="form-control span12 product" name="selProcess" id="selProcess" multiple="" data-placeholder="Choose a Process...">
+                                                    <?php echo $this->Page->generateComboByTable("process","id","name","","where status='ACTIVE'",$processIds,""); ?>
+                                                </select>
+                                            </td>
 											<td class="span1">
 												<input class="form-control span12 required calc" type="text" name="txtProductQty" id="txtProductQty<?php echo $cnt; ?>" placeholder="QTY" value="<?php echo $productRow['prod_qty']; ?>" />
 											</td>
@@ -129,6 +145,11 @@
 										<!--<input class="form-control span12 required calc" type="text" name="txtProduct" id="txtProduct0" placeholder="Item" />-->
                                         <select class="form-control span12 product calc" name="selProduct" id="selProduct0">
                                             <?php echo $this->Page->generateComboByTable("product_master","prod_id","prod_name","","where status='ACTIVE'","","Select Product"); ?>
+                                        </select>
+                                    </td>
+                                    <td class="span2">
+                                        <select class="form-control span12 product" name="selProcess0" id="selProcess0" multiple="" data-placeholder="Choose a Process...">
+                                            <?php echo $this->Page->generateComboByTable("process","id","name","","where status='ACTIVE'","",""); ?>
                                         </select>
                                     </td>
                                     <td class="span1">
@@ -369,6 +390,7 @@ $(document).ready(function(){
         newEntry.attr('id',row);
 
 		newEntry.find('#selProduct').addClass("required");
+		newEntry.find('#selProcess').addClass("required");
 		newEntry.find('#txtProductQty').addClass("required");
 		newEntry.find('#txtProductWeight').addClass("required");
 
@@ -376,6 +398,7 @@ $(document).ready(function(){
 		newEntry.find('select').removeClass('border-red');
 
 		newEntry.find('#selProduct').attr('id','selProduct'+row);
+		newEntry.find('#selProcess').attr('id','selProcess'+row);
 		newEntry.find('#txtProductQty').attr('id','txtProductQty'+row);
 		newEntry.find('#txtProductWeight').attr('id','txtProductWeight'+row);
 
@@ -445,6 +468,7 @@ $(document).ready(function(){
 
 			productArr[trid] = {};
 			productArr[trid]['prodId'] = $(this).find('select[name="selProduct"]').val();
+			productArr[trid]['processIds'] = $(this).find('select[name="selProcess"]').val();
 			productArr[trid]['prodQty'] = $(this).find('input[name="txtProductQty"]').val();
 			productArr[trid]['weightPerQty'] = $(this).find('input[name="txtProductWeight"]').val();
 			productArr[trid]['prodTotalWeight'] = $(this).find('label[name="prodTotalWeight"]').text();
