@@ -15,7 +15,7 @@ class order_model extends Data {
 	//Description : generate uniq order number
 	public function generateOrderNo()
 	{
-		$query = "SELECT (order_id+1) AS new_order_no FROM order_master ORDER BY order_id DESC LIMIT 1";
+		$query = "SELECT (order_id+1) AS new_order_no FROM order_master WHERE type = 'inward' ORDER BY order_id DESC LIMIT 1";
 		$new_order_no = $this->db->query($query)->row()->new_order_no;
 		$new_order_no = sprintf("%04d", $new_order_no);
 		return $new_order_no;
@@ -53,6 +53,12 @@ class order_model extends Data {
 		{
 			$whereClaue .= 	" AND order_date<='".$searchCriteria['to_date']."' ";
 		}
+
+        // By Order Type
+        if(isset($searchCriteria['type']) && $searchCriteria['type'] != "")
+        {
+            $whereClaue .= 	" AND type ='".$searchCriteria['type']."' ";
+        }
 		
 		// Not In
 		if(isset($searchCriteria['not_id']) && $searchCriteria['not_id'] != "")

@@ -19,12 +19,14 @@ class order extends CI_Controller {
 		$search_order = $this->Page->getRequest("search_order");
 		$from_date = $this->Page->getRequest("from_date");
 		$to_date = $this->Page->getRequest("to_date");
+		$type = $this->Page->getRequest("type");
 
 		// Get Order List
 		$searchCriteria = array();
 		$searchCriteria['search_order'] = $search_order;
 		$searchCriteria['from_date'] = $from_date;
 		$searchCriteria['to_date'] = $to_date;
+		$searchCriteria['type'] = $type;
 		$this->order_model->searchCriteria = $searchCriteria;
 		$orderListRes = $this->order_model->getOrderList();
 
@@ -48,6 +50,7 @@ class order extends CI_Controller {
 	### Desc : create client order
 	public function createOrder()
 	{
+		$type = $this->Page->getRequest("type");
 		$action = $this->Page->getRequest("action");
 		$orderId = $this->Page->getRequest("orderId");
 
@@ -72,6 +75,8 @@ class order extends CI_Controller {
 			$rsListing['orderId'] = $orderId;
 			$rsListing['orderNo'] = $this->order_model->generateOrderNo();
 		}
+
+        $rsListing['type'] = $type;
 		// Load Views
 		$this->load->view('order/orderForm', $rsListing);	
 	}
@@ -113,12 +118,23 @@ class order extends CI_Controller {
 		$cnt = 0;
 		// Order Master Entry
 		$arrData = array();
-		$arrData['order_no'] = $this->Page->getRequest("txtOrderNo");
+
+        if($this->Page->getRequest("txtOrderNo")){
+            $arrData['order_no'] = $this->Page->getRequest("txtOrderNo");
+        }
+
+		if($this->Page->getRequest("txtOrderRefNo")){
+            $arrData['ref_order_no'] = $this->Page->getRequest("txtOrderRefNo");
+        }
 		$arrData['order_date'] = $this->Page->getRequest("txtOrderDate");
 		$arrData['customer_id'] = $this->Page->getRequest("selCustomer");
+		$arrData['customer_challan_no'] = $this->Page->getRequest("txtCustChallanNo");
+		$arrData['material_grade'] = $this->Page->getRequest("txtMaterialGrade");
+		$arrData['specification'] = $this->Page->getRequest("txtSpec");
 		$arrData['sub_total_amount'] = $this->Page->getRequest("subTotal");
 		$arrData['order_status'] = "pending";
 		$arrData['order_note'] = $this->Page->getRequest("txtNote");
+		$arrData['type'] = $this->Page->getRequest("hdnType");
 
 		if($strAction == "A")
 		{

@@ -11,7 +11,7 @@
 
 	<div class="row-fluid">
 		<div class="span3 text-left">
-			<button type="button" class="btn btn-small btn-success" onclick="javascript:location.href='index.php?c=order&m=createOrder'"> <i class="icon-plus-sign bigger-125"></i> Generate Challan </button>
+			<button type="button" class="btn btn-small btn-success" onclick="javascript:location.href='index.php?c=order&m=createOrder&type=<?php echo $_REQUEST["type"]; ?>'"> <i class="icon-plus-sign bigger-125"></i> Generate Challan </button>
 			<button type="button" class="btn btn-small btn-danger" onclick="return DeleteRow();" name="btnDelete" id="btnDelete"> <i class="icon-trash bigger-125"></i> Delete </button>
 		</div>
         <div class="span9 text-left" style="vertical-align:text-top;">
@@ -55,7 +55,7 @@
 					{
 						foreach($orderListArr as $arrRecord)
 						{
-							$strEditLink	=	"index.php?c=order&m=createOrder&action=E&orderId=".$arrRecord['order_id'];
+							$strEditLink	=	"index.php?c=order&m=createOrder&action=E&type=".$_REQUEST["type"]."&orderId=".$arrRecord['order_id'];
 							echo '<tr>';
 							echo '<td><input type="checkbox" name="chk_lst_list1[]" id="chk_lst_'.$arrRecord['order_id'].'" value="'.$arrRecord['order_id'].'" /><span class="lbl"></span></td>';
 							echo '<td>'. $arrRecord['order_no'] .'</td>';

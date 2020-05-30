@@ -1,17 +1,32 @@
 <?php include(APPPATH.'views/top.php'); ?>
 <div class="page-header position-relative">
-    <h1>Generate Challan</h1>
+    <?php
+    if($type == "inward"){
+        echo "<h1>Generate Inward Challan</h1>";
+    } elseif ($type == "outward"){
+        echo "<h1>Generate Outward Challan</h1>";
+    }
+    ?>
+
 </div>
 <div class="row-fluid">
     <div class="span12">                 
     	<form class="form-horizontal" id="frmOrder"/>
-        	<div class="control-group">
-                <label class="control-label" for="form-input-readonly">Challan No</label>
-
-                <div class="controls">
-                    <input readonly="" type="text" class="span4" id="txtOrderNo" name="txtOrderNo" value="<?php echo $orderNo; ?>" disabled="disabled" />
+            <?php if($type == "inward"){ ?>
+                <div class="control-group">
+                    <label class="control-label" for="form-input-readonly">Challan No</label>
+                    <div class="controls">
+                        <input readonly="" type="text" class="span4 required" id="txtOrderNo" name="txtOrderNo" value="<?php echo $orderNo; ?>" disabled="disabled" />
+                    </div>
                 </div>
-            </div>
+            <?php } else { ?>
+                <div class="control-group">
+                    <label class="control-label" for="form-input-readonly">Ref. Inward Challan No</label>
+                    <div class="controls">
+                        <input type="text" class="span4 required" id="txtOrderRefNo" name="txtOrderRefNo" value="<?php echo $orderDetailArr['ref_order_no']; ?>" />
+                    </div>
+                </div>
+            <?php } ?>
 
             <div class="control-group">
                 <label class="control-label" for="form-field-2">Customer</label>
@@ -21,6 +36,30 @@
                         <?php echo $this->Page->generateComboByTable("vendor_master","vendor_id","vendor_name","","where status='ACTIVE' order by vendor_name",$orderDetailArr['customer_id'],"Select Customer"); ?>
                     </select>
 					<a id="" href="#cust-form" data-toggle="modal">Add New Customer<i class="icon-external-plus"></i></a>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="form-input-readonly">Customer challan No</label>
+
+                <div class="controls">
+                    <input type="text" class="span4" id="txtCustChallanNo" name="txtCustChallanNo" value="<?php echo $orderDetailArr['customer_challan_no']; ?>"  />
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="form-input-readonly">Material Grade</label>
+
+                <div class="controls">
+                    <input type="text" class="span4" id="txtMaterialGrade" name="txtMaterialGrade" value="<?php echo $orderDetailArr['material_grade']; ?>"  />
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="form-input-readonly">Specification</label>
+
+                <div class="controls">
+                    <input type="text" class="span4" id="txtSpec" name="txtSpec" value="<?php echo $orderDetailArr['specification']; ?>"  />
                 </div>
             </div>
 
@@ -52,8 +91,10 @@
                                     </th>
                                     <th class="span2">Process</th>
                                     <th class="span1">Quantity</th>
-                                    <th class="span2">Weight</th>
-                                    <th class="span1">Total weight</th>
+                                    <?php if($type == "outward"){ ?>
+                                        <th class="span2">Weight</th>
+                                        <th class="span1">Total weight</th>
+                                    <?php } ?>
                                     <th class="span1">Action</th>
                                 </tr>
                             </thead>
@@ -70,12 +111,14 @@
                                             <?php echo $this->Page->generateComboByTable("process","id","name","","where status='ACTIVE'","",""); ?>
                                         </select>
                                     </td>
-                                    <td class="span1">
-                                    	<input class="form-control span12 calc" type="text" name="txtProductQty" id="txtProductQty" placeholder="QTY"/>
-                                    </td>
-                                    <td class="span2">
-                                    	<input class="form-control span12 calc" name="txtProductWeight" id="txtProductWeight" type="text" placeholder="INR" />
-                                    </td>
+                                    <?php if($type == "outward"){ ?>
+                                        <td class="span1">
+                                            <input class="form-control span12 calc" type="text" name="txtProductQty" id="txtProductQty" placeholder="QTY"/>
+                                        </td>
+                                        <td class="span2">
+                                            <input class="form-control span12 calc" name="txtProductWeight" id="txtProductWeight" type="text" placeholder="INR" />
+                                        </td>
+                                    <?php } ?>
                                     <td class="span1">
                                     	<label id="prodTotalWeight" name="prodTotalWeight" class="span12">0.0</label>
                                     </td>
@@ -110,12 +153,15 @@
 											<td class="span1">
 												<input class="form-control span12 required calc" type="text" name="txtProductQty" id="txtProductQty<?php echo $cnt; ?>" placeholder="QTY" value="<?php echo $productRow['prod_qty']; ?>" />
 											</td>
+
+                                            <?php if($type == "outward"){ ?>
 											<td class="span2">
 												<input class="form-control span12 required calc" name="txtProductWeight" id="txtProductWeight<?php echo $cnt; ?>" type="text" placeholder="INR" value="<?php echo $productRow['weight_per_qty']; ?>" />
 											</td>
 											<td class="span1">
 												<label id="prodTotalWeight<?php echo $cnt; ?>" name="prodTotalWeight" class="span12"><?php echo $productRow['prod_total_weight']; ?></label>
 											</td>
+											<?php } ?>
 											<td class="span1">
 												<?php
 												if($cnt == 0)
@@ -215,6 +261,7 @@
                 <button class="btn" type="reset"><i class="icon-undo bigger-110"></i>Reset</button>
 				<input type="hidden" name="hdnOrderId" id="hdnOrderId" value="<?php echo $orderId; ?>" />
 				<input type="hidden" name="hdnAction" id="hdnAction" value="<?php echo $strAction; ?>" />
+				<input type="hidden" name="hdnType" id="hdnType" value="<?php echo $type; ?>" />
            </div>
 		   <!-- END BUTTON SECTION -->
         </form>						
@@ -497,13 +544,22 @@ $(document).ready(function(){
 		var param = {};
 		param['hdnAction'] = $("#hdnAction").val();
 		param['hdnOrderId'] = $("#hdnOrderId").val();
-		param['txtOrderNo'] = $("#txtOrderNo").val();
+		if($("#txtOrderNo").val() != undefined){
+            param['txtOrderNo'] = $("#txtOrderNo").val();
+        } else {
+            param['txtOrderNo'] = null;
+        }
+		param['txtOrderRefNo'] = $("#txtOrderRefNo").val();
 		param['selCustomer'] = $("#selCustomer").val();
+		param['txtCustChallanNo'] = $("#txtCustChallanNo").val();
+		param['txtMaterialGrade'] = $("#txtMaterialGrade").val();
+		param['txtSpec'] = $("#txtSpec").val();
 		param['txtOrderDate'] = $("#txtOrderDate").val();
 		param['txtNote'] = $("#txtNote").val();
 		param['subTotal'] = $("#lblSubTotal").text();
+		param['hdnType'] = $("#hdnType").val();
 		param['productArr'] = productArr;
-		//alert(param.toSource()); return false;
+
 		$.ajax({
 			type:"POST",
 			data:param,
@@ -513,7 +569,7 @@ $(document).ready(function(){
 				if(res == "1")
 				{
 					alert("Order saved successfully");
-					window.location.href="index.php?c=order";
+					window.location.href="index.php?c=order&type"+ $("#hdnType").val();
 				}
 				else
 				{
