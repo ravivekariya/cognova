@@ -126,6 +126,12 @@ class Page extends CI_Model {
 
 		$this->session->set_userdata('sesErrorMessage', $strMessage);
 	}
+
+    public function setFlashMessage($type, $message)
+    {
+        $strMessage	= '<div class="alert alert-'.$type.'"><button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>'.$message.'</div>';
+        $this->session->set_userdata('sesErrorMessage', $strMessage);
+    }
     
     function getComboOptions($strCaseName)
     {

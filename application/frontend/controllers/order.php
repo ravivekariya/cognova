@@ -8,7 +8,8 @@ class order extends CI_Controller {
 		$this->load->model("order_model",'',true);
 		$this->load->model("product_model",'',true);
 		$this->load->model("status_model",'',true);
-		$this->load->model("customer_model",'',true);
+		$this->load->model("process_model",'',true);
+        $this->load->model("vendor_model",'',true);
 	}
 	####################################################################
 	#						START CLIENT ORDER					       #
@@ -28,22 +29,59 @@ class order extends CI_Controller {
 		$searchCriteria['to_date'] = $to_date;
 		$searchCriteria['type'] = $type;
 		$this->order_model->searchCriteria = $searchCriteria;
-		$orderListRes = $this->order_model->getOrderList();
+		$orderListArr = $this->order_model->getInwardOrderList();
 
-		$orderListArr = array();
+        // get Product List
+        $searchCriteria = ['status' => 'ACTIVE'];
+        $this->product_model->searchCriteria = $searchCriteria;
+        $prodResA = $this->product_model->getProduct();
+        $prodA = [];
+        if(is_array($prodResA) && count($prodResA) > 0){
+            foreach ($prodResA AS $record){
+                $prodA[$record["prod_id"]] = $record["prod_name"];
+            }
+        }
+
+        // get vendor List
+        $searchCriteria = ['status' => 'ACTIVE'];
+        $this->vendor_model->searchCriteria = $searchCriteria;
+        $prodVendorA = $this->vendor_model->getVendor();
+        $vendorA = [];
+        if(is_array($prodVendorA) && count($prodVendorA) > 0){
+            foreach ($prodVendorA AS $record){
+                $vendorA[$record["vendor_id"]] = $record["vendor_name"];
+            }
+        }
+
+        // get process List
+        $searchCriteria = ['status' => 'ACTIVE'];
+        $this->process_model->searchCriteria = $searchCriteria;
+        $resProcessA = $this->process_model->getDetails();
+        $processA = [];
+        if(is_array($resProcessA) && count($resProcessA) > 0){
+            foreach ($resProcessA AS $record){
+                $processA[$record["id"]] = $record["name"];
+            }
+        }
+
+		/*$orderListArr = array();
 		if(count($orderListRes) > 0)
 		{
 			foreach($orderListRes AS $orderRow)
 			{
 				$orderListArr[] = $orderRow;
 			}
-		}
+		}*/
 		//$this->Page->pr($orderListArr); exit;
 
-		$rsListing['orderListArr'] = $orderListArr;
+        $rsListing['prodA'] = $prodA;
+        $rsListing['processA'] = $processA;
+        $rsListing['vendorA'] = $vendorA;
+        $rsListing['orderListArr'] = $orderListArr;
 		$rsListing['search_order'] = $search_order;
 		$rsListing['from_date'] = $from_date;
 		$rsListing['to_date'] = $to_date;
+		$rsListing['type'] = $type;
 		$this->load->view('order/listClientOrder', $rsListing);
 	}
 	### Auther : Nikunj Bambhroliya
@@ -53,6 +91,7 @@ class order extends CI_Controller {
 		$type = $this->Page->getRequest("type");
 		$action = $this->Page->getRequest("action");
 		$orderId = $this->Page->getRequest("orderId");
+		$refOrderNo = $this->Page->getRequest("refOrderNo");
 
 		if($action == "E")
 		{
@@ -63,6 +102,7 @@ class order extends CI_Controller {
 			$this->order_model->searchCriteria = $searchCriteria;
 			$orderDetailArr = $this->order_model->getOrderDetails();
 			$orderDetailArr = $orderDetailArr[0];
+            $refOrderNo = $orderDetailArr["ref_order_no"];
 
 			$rsListing['strAction'] = "E";
 			$rsListing['orderId'] = $orderId;
@@ -71,12 +111,38 @@ class order extends CI_Controller {
 		}
 		else
 		{
-			$rsListing['strAction'] = "A";
+            if($refOrderNo){
+                // Get Order Details
+                $searchCriteria = array();
+                $searchCriteria['order_no'] = $refOrderNo;
+                $searchCriteria['fetchProductDetail'] = 1;
+                $this->order_model->searchCriteria = $searchCriteria;
+                $orderDetailArr = $this->order_model->getOrderDetails();
+                $orderDetailArr = $orderDetailArr[0];
+
+                if(!$orderDetailArr){
+                    $this->Page->setFlashMessage('error', 'Inward Order not found');
+                    redirect('c=order&m=createOrder&type='.$type, 'location');
+                }
+
+                $rsListing['orderDetailArr'] = $orderDetailArr;
+            }
+
+		    $rsListing['strAction'] = "A";
 			$rsListing['orderId'] = $orderId;
 			$rsListing['orderNo'] = $this->order_model->generateOrderNo();
+			$rsListing['refOrderNo'] = $refOrderNo;
+			$rsListing['flashMessage'] = $this->Page->getMessage();
 		}
 
+        // get Total Inward and processed(Outward) qty.
+        if($refOrderNo){
+            $proceedQtyA = $this->order_model->getInwardQtyDetails($refOrderNo);
+        }
+
         $rsListing['type'] = $type;
+        $rsListing['proceedQtyA'] = $proceedQtyA;
+
 		// Load Views
 		$this->load->view('order/orderForm', $rsListing);	
 	}
@@ -114,6 +180,7 @@ class order extends CI_Controller {
 		$strAction = $this->Page->getRequest("hdnAction");
 		$orderId = $this->Page->getRequest("hdnOrderId");
 		$productArr = $_REQUEST["productArr"];
+        $type = $this->Page->getRequest("hdnType");
 
 		$cnt = 0;
 		// Order Master Entry
@@ -134,7 +201,7 @@ class order extends CI_Controller {
 		$arrData['sub_total_amount'] = $this->Page->getRequest("subTotal");
 		$arrData['order_status'] = "pending";
 		$arrData['order_note'] = $this->Page->getRequest("txtNote");
-		$arrData['type'] = $this->Page->getRequest("hdnType");
+		$arrData['type'] = $type;
 
 		if($strAction == "A")
 		{
@@ -143,6 +210,12 @@ class order extends CI_Controller {
 
 			$this->order_model->tbl = "order_master";
 			$orderId = $this->order_model->insert($arrData);
+
+			if($type == "inward"){
+                // save order ref. keep track
+                $this->order_model->tbl = "order_track";
+                $this->order_model->insert(["order_id" => $orderId]);
+            }
 		}
 		else
 		{
@@ -157,8 +230,8 @@ class order extends CI_Controller {
 		}
 
 		// Remove existing products
-		$strQuery = "DELETE FROM order_product_detail WHERE order_id=".$orderId."";
-		$this->db->query($strQuery);
+		//$strQuery = "DELETE FROM order_product_detail WHERE order_id=".$orderId."";
+		//$this->db->query($strQuery);
 
 		// Add Order Product Details
 		if($orderId != "" && $orderId != 0)
@@ -178,14 +251,22 @@ class order extends CI_Controller {
 				{
 					$arrData['insertby'] = $this->Page->getSession("intUserId");
 					$arrData['insertdate'] = date('Y-m-d H:i:s');
+
+                    $this->order_model->tbl = "order_product_detail";
+                    $this->order_model->insert($arrData);
 				}
 				else
 				{
 					$arrData['updateby']	=	$this->Page->getSession("intUserId");
 					$arrData['updatedate'] 	= 	date('Y-m-d H:i:s');
+
+                    $whereArr = array();
+                    $whereArr['order_id'] = $orderId;
+                    $whereArr['prod_id'] = $arr['prodId'];
+
+                    $this->order_model->tbl = "order_product_detail";
+                    $this->order_model->update($arrData, $whereArr);
 				}
-				$this->order_model->tbl = "order_product_detail";
-				$this->order_model->insert($arrData);
 				$cnt++;
 			}
 		}

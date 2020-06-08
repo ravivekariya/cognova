@@ -2,6 +2,7 @@
 
 $(document).ready(function() {
 	$('.date-picker').datepicker();
+	$(".date-picker").attr("autocomplete", "off");
 	/*$('.date-picker').datepicker().next().on(ace.click_event, function(){
 		$(this).prev().focus();
 	});*/
@@ -58,7 +59,6 @@ function submit_form(form)
 	$('#'+formid+' .required').each(function() {
 		if( $.trim($(this).val()).length == 0 ) 
 		{
-			//alert(this.id);
 			setStyle(this);
 			//$(this).after('<span class="errmsg">* This field is required.</span>');
 			blnError	=	true;
@@ -148,12 +148,18 @@ function setStyle(element)
 {
 	//element.style.border	=	'1px solid #F00';
 	$(element).addClass('border-red');
+	if($(element).hasClass("chzn-select")){
+		$("#"+element.id+"_chzn").addClass('border-red');
+	}
 }
 
 function resetStyle(element)
 {
 	//element.style.border	=	'none;';
 	$(element).removeClass('border-red');
+	if($(element).hasClass("chzn-select")){
+		$("#"+element.id+"_chzn").removeClass('border-red');
+	}
 }
 
 function checkValidEmail(strEmailVal)

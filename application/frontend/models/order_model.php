@@ -15,11 +15,13 @@ class order_model extends Data {
 	//Description : generate uniq order number
 	public function generateOrderNo()
 	{
-		$query = "SELECT (order_id+1) AS new_order_no FROM order_master WHERE type = 'inward' ORDER BY order_id DESC LIMIT 1";
+		$query = "SELECT (id+1) AS new_order_no FROM order_track ORDER BY id DESC LIMIT 1";
 		$new_order_no = $this->db->query($query)->row()->new_order_no;
-		$new_order_no = sprintf("%04d", $new_order_no);
+		$new_order_no = ($new_order_no) ? sprintf("%04d", $new_order_no) : "0001";
 		return $new_order_no;
 	}
+
+
 
 	//Author : Nikunj Bambhroliya
 	//Description : return clienct created order list
@@ -112,6 +114,12 @@ class order_model extends Data {
 		{
 			$whereClaue .= 	" AND om.order_id IN (".$searchCriteria['order_id'].") ";
 		}
+
+        // By Order Number
+        if(isset($searchCriteria['order_no']) && $searchCriteria['order_no'] != "")
+        {
+            $whereClaue .= 	" AND om.order_no = '".$searchCriteria['order_no']."' ";
+        }
 
 		// By Customer Id
 		if(isset($searchCriteria['cust_id']) && $searchCriteria['cust_id'] != "")
@@ -324,4 +332,114 @@ class order_model extends Data {
 		$rsData     = $result->result_array();
 		return $rsData;
 	}
+
+    public function getInwardOrderList()
+    {
+        $searchCriteria = array();
+        $searchCriteria = $this->searchCriteria;
+
+        $selectField = "*";
+        if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
+        {
+            $selectField = 	$searchCriteria['selectField'];
+        }
+
+        $whereClaue = "WHERE 1=1 ";
+
+        // By Order
+        if(isset($searchCriteria['search_order']) && $searchCriteria['search_order'] != "")
+        {
+            $whereClaue .= 	" AND om.order_no='".$searchCriteria['search_order']."' ";
+        }
+
+        // By From Date
+        if(isset($searchCriteria['from_date']) && $searchCriteria['from_date'] != "")
+        {
+            $whereClaue .= 	" AND om.order_date>='".$searchCriteria['from_date']."' ";
+        }
+
+        // By To date
+        if(isset($searchCriteria['to_date']) && $searchCriteria['to_date'] != "")
+        {
+            $whereClaue .= 	" AND om.order_date<='".$searchCriteria['to_date']."' ";
+        }
+
+        // By Order Type
+        if(isset($searchCriteria['type']) && $searchCriteria['type'] != "")
+        {
+            $whereClaue .= 	" AND om.type ='".$searchCriteria['type']."' ";
+        }
+
+        // Not In
+        if(isset($searchCriteria['not_id']) && $searchCriteria['not_id'] != "")
+        {
+            $whereClaue .= 	" AND om.order_id !=".$searchCriteria['not_id']." ";
+        }
+
+        $orderField = " om.order_id ";
+        $orderDir = " ASC";
+
+        // Set Order Field
+        if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")
+        {
+            $orderField = $searchCriteria['orderField'];
+        }
+
+        // Set Order Field
+        if(isset($searchCriteria['orderDir']) && $searchCriteria['orderDir'] != "")
+        {
+            $orderDir = $searchCriteria['orderDir'];
+        }
+
+        $sql = "SELECT om.*,opd.prod_id,opd.process_ids,opd.prod_qty,opd.weight_per_qty,opd.prod_total_weight FROM order_master AS om
+                LEFT JOIN order_product_detail AS opd
+                ON om.order_id = opd.order_id
+                ".$whereClaue."
+                GROUP BY om.order_id,opd.prod_id
+                ORDER BY ".$orderField." ".$orderDir."";
+
+        $result     = $this->db->query($sql);
+        $rsData = $result->result_array();
+
+        return $rsData;
+    }
+
+    public function getInwardQtyDetails($orderNumber)
+    {
+        $sql = "SELECT opd.prod_id,opd.prod_qty FROM order_master AS om
+                LEFT JOIN order_product_detail AS opd
+                ON om.order_id = opd.order_id
+                WHERE om.order_no = '".$orderNumber."'
+                GROUP BY om.order_id,opd.prod_id";
+
+        $result     = $this->db->query($sql);
+        $rsData = $result->result_array();
+
+        $inwardQtyA = [];
+        if($rsData && count($rsData) > 0){
+            foreach ($rsData as $data){
+                $inwardQtyA[$data["prod_id"]] = $data["prod_qty"];
+            }
+        }
+
+        $sql = "SELECT opd.prod_id,SUM(opd.prod_qty) AS prod_qty FROM order_master AS om
+                LEFT JOIN order_product_detail AS opd
+                ON om.order_id = opd.order_id
+                WHERE om.ref_order_no = '".$orderNumber."'
+                GROUP BY opd.prod_id";
+
+        $result     = $this->db->query($sql);
+        $rsData = $result->result_array();
+
+        $outwardProceedQtyA = [];
+        if($rsData && count($rsData) > 0){
+            foreach ($rsData as $data){
+                $outwardProceedQtyA[$data["prod_id"]] = $data["prod_qty"];
+            }
+        }
+
+        $returnA = ['inwardQtyA' => $inwardQtyA, 'outwardProceedQtyA' => $outwardProceedQtyA];
+
+        return $returnA;
+    }
 }
