@@ -30,7 +30,7 @@ class order_model extends Data {
 		$searchCriteria = array();
 		$searchCriteria = $this->searchCriteria;
 		
-		$selectField = "*";
+		$selectField = "*,DATE_FORMAT(order_date, '%d-%m-%Y') AS f_order_date";
 		if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
 		{
 			$selectField = 	$searchCriteria['selectField'];
@@ -101,7 +101,7 @@ class order_model extends Data {
 		$searchCriteria = array();
 		$searchCriteria = $this->searchCriteria;
 		
-		$selectField = "om.*";
+		$selectField = "om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date";
 		if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
 		{
 			$selectField = 	$searchCriteria['selectField'];
@@ -161,7 +161,7 @@ class order_model extends Data {
 		}
 
 		$sqlQuery = "SELECT ".$selectField." FROM order_master AS om ".$whereClaue."  ORDER BY ".$orderField." ".$orderDir."";
-		//echo $sqlQuery; exit;
+		// echo $sqlQuery; exit;
 		
 		$result     = $this->db->query($sqlQuery);
 		$rsData     = $result->result_array();
@@ -338,7 +338,7 @@ class order_model extends Data {
         $searchCriteria = array();
         $searchCriteria = $this->searchCriteria;
 
-        $selectField = "*";
+        $selectField = "*,DATE_FORMAT(order_date, '%d-%m-%Y') AS f_order_date";
         if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
         {
             $selectField = 	$searchCriteria['selectField'];
@@ -349,7 +349,8 @@ class order_model extends Data {
         // By Order
         if(isset($searchCriteria['search_order']) && $searchCriteria['search_order'] != "")
         {
-            $whereClaue .= 	" AND om.order_no='".$searchCriteria['search_order']."' ";
+            $searchOrder = str_replace(",","','", $searchCriteria['search_order']);
+            $whereClaue .= 	" AND om.order_no IN ('".$searchOrder."') ";
         }
 
         // By From Date
@@ -376,6 +377,24 @@ class order_model extends Data {
             $whereClaue .= 	" AND om.order_id !=".$searchCriteria['not_id']." ";
         }
 
+        // keyword search
+        if(isset($searchCriteria['keyword']) && $searchCriteria['keyword'] != "")
+        {
+            $whereClaue .= 	" AND (om.order_no LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.ref_order_no  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.customer_challan_no  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR DATE_FORMAT(om.order_date, '%d-%m-%Y')  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.order_note  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.material_grade  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.specification  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR opd.prod_qty  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR opd.weight_per_qty  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR opd.prod_total_weight  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR vm.vendor_name  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR pm.prod_name  LIKE '%".$searchCriteria['keyword']."%'
+                                    ) ";
+        }
+
         $orderField = " om.order_id ";
         $orderDir = " ASC";
 
@@ -391,15 +410,33 @@ class order_model extends Data {
             $orderDir = $searchCriteria['orderDir'];
         }
 
-        $sql = "SELECT om.*,opd.prod_id,opd.process_ids,opd.prod_qty,opd.weight_per_qty,opd.prod_total_weight FROM order_master AS om
+        // set limit clause
+        $limitClause = "";
+        if(isset($searchCriteria['limit']) && isset($searchCriteria['offset']))
+        {
+            $limitClause = " LIMIT ".$searchCriteria['offset'].",".$searchCriteria['limit']." ";
+        }
+
+        $sql = "SELECT om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date, opd.prod_id,opd.process_ids,opd.prod_qty,opd.weight_per_qty,opd.prod_total_weight,vm.vendor_name,pm.prod_name
+                FROM order_master AS om
                 LEFT JOIN order_product_detail AS opd
                 ON om.order_id = opd.order_id
+                LEFT JOIN vendor_master AS vm
+                ON om.customer_id = vm.vendor_id
+                LEFT JOIN product_master AS pm
+                ON opd.prod_id = pm.prod_id
                 ".$whereClaue."
                 GROUP BY om.order_id,opd.prod_id
                 ORDER BY ".$orderField." ".$orderDir."";
 
         $result     = $this->db->query($sql);
-        $rsData = $result->result_array();
+        $count = count($result->result_array());
+
+        $sql .= $limitClause;
+        $result = $this->db->query($sql);
+
+        $rsData['data'] = $result->result_array();
+        $rsData['count'] = $count;
 
         return $rsData;
     }

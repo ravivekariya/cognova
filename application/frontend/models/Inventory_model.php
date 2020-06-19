@@ -13,14 +13,69 @@ class Inventory_model extends Data {
 
     public function getInwardOrderList()
     {
-        $sql = "SELECT om.*,opd.prod_id,opd.process_ids,opd.prod_qty FROM order_master AS om
+        $searchCriteria = array();
+        $searchCriteria = $this->searchCriteria;
+        $whereClaue = "";
+
+        // keyword search
+        if(isset($searchCriteria['keyword']) && $searchCriteria['keyword'] != "")
+        {
+            $whereClaue .= 	" AND (om.order_no LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.ref_order_no  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.customer_challan_no  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR DATE_FORMAT(om.order_date, '%d-%m-%Y')  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.order_note  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.material_grade  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR om.specification  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR opd.prod_qty  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR opd.weight_per_qty  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR opd.prod_total_weight  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR vm.vendor_name  LIKE '%".$searchCriteria['keyword']."%'
+                                    OR pm.prod_name  LIKE '%".$searchCriteria['keyword']."%'
+                                    ) ";
+        }
+
+        $orderField = " om.order_id ";
+        $orderDir = " ASC";
+
+        // Set Order Field
+        if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")
+        {
+            $orderField = $searchCriteria['orderField'];
+        }
+
+        // Set Order Field
+        if(isset($searchCriteria['orderDir']) && $searchCriteria['orderDir'] != "")
+        {
+            $orderDir = $searchCriteria['orderDir'];
+        }
+
+        // set limit clause
+        $limitClause = "";
+        if(isset($searchCriteria['limit']) && isset($searchCriteria['offset']))
+        {
+            $limitClause = " LIMIT ".$searchCriteria['offset'].",".$searchCriteria['limit']." ";
+        }
+
+        $sql = "SELECT om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name FROM order_master AS om
                 LEFT JOIN order_product_detail AS opd
                 ON om.order_id = opd.order_id
+                LEFT JOIN vendor_master AS vm
+                ON om.customer_id = vm.vendor_id
+                LEFT JOIN product_master AS pm
+                ON opd.prod_id = pm.prod_id
                 WHERE om.type = 'inward'
+                ".$whereClaue."
                 GROUP BY om.order_no,opd.prod_id";
 
         $result     = $this->db->query($sql);
-        $rsData = $result->result_array();
+        $count = count($result->result_array());
+
+        $sql .= $limitClause;
+        $result = $this->db->query($sql);
+
+        $rsData['data'] = $result->result_array();
+        $rsData['count'] = $count;
 
         return $rsData;
     }
@@ -56,7 +111,7 @@ class Inventory_model extends Data {
         $searchCriteria = array();
         $searchCriteria = $this->searchCriteria;
 
-        $selectField = "*";
+        $selectField = "*,DATE_FORMAT(order_date, '%d-%m-%Y') AS order_date";
         if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
         {
             $selectField = 	$searchCriteria['selectField'];

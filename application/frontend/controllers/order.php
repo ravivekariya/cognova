@@ -17,39 +17,61 @@ class order extends CI_Controller {
 
 	public function index()
 	{
-		$search_order = $this->Page->getRequest("search_order");
-		$from_date = $this->Page->getRequest("from_date");
-		$to_date = $this->Page->getRequest("to_date");
+        $GET = $this->input->get();
+        unset($GET['c']);
+        unset($GET['m']);
+        $searchParams = json_encode($GET);
 		$type = $this->Page->getRequest("type");
 
-		// Get Order List
-		$searchCriteria = array();
-		$searchCriteria['search_order'] = $search_order;
-		$searchCriteria['from_date'] = $from_date;
-		$searchCriteria['to_date'] = $to_date;
-		$searchCriteria['type'] = $type;
-		$this->order_model->searchCriteria = $searchCriteria;
-		$orderListArr = $this->order_model->getInwardOrderList();
+		$rsListing['type'] = $type;
+        $rsListing['flashMessage'] = $this->Page->getMessage();
+        $rsListing['searchParams'] = $searchParams;
+		$this->load->view('order/listClientOrder', $rsListing);
+	}
 
-        // get Product List
-        $searchCriteria = ['status' => 'ACTIVE'];
-        $this->product_model->searchCriteria = $searchCriteria;
-        $prodResA = $this->product_model->getProduct();
-        $prodA = [];
-        if(is_array($prodResA) && count($prodResA) > 0){
-            foreach ($prodResA AS $record){
-                $prodA[$record["prod_id"]] = $record["prod_name"];
-            }
+    ### Auther : Nikunj Bambhroliya
+    ### Desc : get order data
+    public function getOrderData(){
+        $type = $this->Page->getRequest("type");
+        $draw = $this->input->post('draw');
+
+        // Get Order List
+        $searchCriteria = array();
+        $searchCriteria['type'] = $type;
+        $searchCriteria['offset'] = $this->input->post('start');
+        $searchCriteria['limit'] = $this->input->post('length');
+        // search using datatable search option code start
+        if($this->input->post('search')){
+            $searchCriteria['keyword'] = $this->input->post('search')['value'];
         }
 
-        // get vendor List
-        $searchCriteria = ['status' => 'ACTIVE'];
-        $this->vendor_model->searchCriteria = $searchCriteria;
-        $prodVendorA = $this->vendor_model->getVendor();
-        $vendorA = [];
-        if(is_array($prodVendorA) && count($prodVendorA) > 0){
-            foreach ($prodVendorA AS $record){
-                $vendorA[$record["vendor_id"]] = $record["vendor_name"];
+        $this->order_model->searchCriteria = $searchCriteria;
+        $orderListArr = $this->order_model->getInwardOrderList();
+
+        if($type == "outward"){
+            $challanNoA = array();
+            if($orderListArr["count"] > 0)
+            {
+                foreach($orderListArr["data"] AS $orderRow)
+                {
+                    $challanNoA[$orderRow["ref_order_no"]] = $orderRow["ref_order_no"];
+                }
+            }
+
+            // Get inward Qty
+            $searchCriteria = array();
+            $searchCriteria['type'] = "inward";
+            $searchCriteria['search_order'] = implode($challanNoA,",");
+            $this->order_model->searchCriteria = $searchCriteria;
+            $inwardOrderListArr = $this->order_model->getInwardOrderList();
+
+            $inwardQtyA = array();
+            if($inwardOrderListArr["count"] > 0)
+            {
+                foreach($inwardOrderListArr["data"] AS $orderRow)
+                {
+                    $inwardQtyA[$orderRow["order_no"]] = $orderRow["prod_qty"];
+                }
             }
         }
 
@@ -64,26 +86,70 @@ class order extends CI_Controller {
             }
         }
 
-		/*$orderListArr = array();
-		if(count($orderListRes) > 0)
-		{
-			foreach($orderListRes AS $orderRow)
-			{
-				$orderListArr[] = $orderRow;
-			}
-		}*/
-		//$this->Page->pr($orderListArr); exit;
+        $data = [];
+        if($orderListArr["count"] > 0)
+        {
+            foreach($orderListArr["data"] as $arrRecord)
+            {
+                $strProcess = "";
+                if($arrRecord['process_ids']){
+                    $processIdA = json_decode($arrRecord['process_ids']);
+                    if(is_array($processIdA) && count($processIdA)){
+                        foreach ($processIdA as $processId){
+                            $strProcess .= $processA[$processId].", ";
+                        }
+                    }
+                }
+                $strProcess = rtrim($strProcess, ", ");
 
-        $rsListing['prodA'] = $prodA;
-        $rsListing['processA'] = $processA;
-        $rsListing['vendorA'] = $vendorA;
-        $rsListing['orderListArr'] = $orderListArr;
-		$rsListing['search_order'] = $search_order;
-		$rsListing['from_date'] = $from_date;
-		$rsListing['to_date'] = $to_date;
-		$rsListing['type'] = $type;
-		$this->load->view('order/listClientOrder', $rsListing);
-	}
+                if ($type == "inward") {
+                    $strEditLink	=	"index.php?c=order&m=createOrder&action=E&type=".$_REQUEST["type"]."&orderId=".$arrRecord['order_id'];
+                    $data[] = array(
+                        "order_no" => $arrRecord['order_no'],
+                        "order_date" => $arrRecord['order_date'],
+                        "customer_challan_no" => $arrRecord['customer_challan_no'],
+                        "customer_id" => $arrRecord['vendor_name'],
+                        "prod_id" => $arrRecord['prod_name'],
+                        "prod_qty" =>  $arrRecord['prod_qty'],
+                        "material_grade" =>  $arrRecord['material_grade'],
+                        "process" => $strProcess,
+                        "specification" => $arrRecord['specification'],
+                        "order_note" => $arrRecord['order_note'],
+                        'actionLink' => '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a> <a href="javascript:void(0);" class="red delete" title="Delete" id="'.$arrRecord['order_id'].'"><i class="icon-trash bigger-130"></i></a>',
+                    );
+                } else {
+                    $strEditLink	=	"index.php?c=order&m=createOrder&action=E&type=".$_REQUEST["type"]."&orderId=".$arrRecord['order_id'];
+                    $data[] = array(
+                        "ref_order_no" => $arrRecord['ref_order_no'],
+                        "order_date" => $arrRecord['order_date'],
+                        "prod_qty" =>  $arrRecord['prod_qty'],
+                        "weight_per_qty" =>  $arrRecord['weight_per_qty'],
+                        "prod_total_weight" =>  $arrRecord['prod_total_weight'],
+                        "customer_challan_no" => $arrRecord['customer_challan_no'],
+                        "inward_qty" => $inwardQtyA[$arrRecord['ref_order_no']],
+                        "customer_id" => $arrRecord['vendor_name'],
+                        "prod_id" => $arrRecord['prod_name'],
+                        "material_grade" =>  $arrRecord['material_grade'],
+                        "process" => $strProcess,
+                        "specification" => $arrRecord['specification'],
+                        "order_note" => $arrRecord['order_note'],
+                        'actionLink' => '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a> <a href="javascript:void(0);" class="red delete" title="Delete" id="'.$arrRecord['order_id'].'"><i class="icon-trash bigger-130"></i></a> <a href="index.php?c=invoice&m=generateInvoice&orderId='.$arrRecord['order_id'].'" class="blue" title="Invoice"><i class="icon-save bigger-130"></i></a>',
+                    );
+                }
+            }
+        }
+
+        $result = array(
+            "draw" => $draw,
+            "recordsTotal" => $orderListArr['count'],
+            "recordsFiltered" => $orderListArr['count'],
+            "data" => $data
+        );
+
+        echo json_encode($result);
+        exit();
+    }
+
 	### Auther : Nikunj Bambhroliya
 	### Desc : create client order
 	public function createOrder()
@@ -193,7 +259,7 @@ class order extends CI_Controller {
 		if($this->Page->getRequest("txtOrderRefNo")){
             $arrData['ref_order_no'] = $this->Page->getRequest("txtOrderRefNo");
         }
-		$arrData['order_date'] = $this->Page->getRequest("txtOrderDate");
+		$arrData['order_date'] = date('Y-m-d',strtotime($this->Page->getRequest("txtOrderDate")));
 		$arrData['customer_id'] = $this->Page->getRequest("selCustomer");
 		$arrData['customer_challan_no'] = $this->Page->getRequest("txtCustChallanNo");
 		$arrData['material_grade'] = $this->Page->getRequest("txtMaterialGrade");
@@ -436,6 +502,32 @@ class order extends CI_Controller {
 		}
 		echo "1"; exit;
 	}
+
+    public function DeleteOrder()
+    {
+        $orderId	=	$this->input->post('orderId');
+        $type	=	$this->input->post('type');
+
+        if($type == "inward"){
+            // Get Order List
+            $searchCriteria = array();
+            $searchCriteria['id'] = $orderId;
+            $this->order_model->searchCriteria = $searchCriteria;
+            $orderListArr = $this->order_model->getInwardOrderList();
+            $orderNo = $orderListArr["data"][0]['order_no'];
+
+            // remove outward entries referenced with this inward order
+            if($orderNo){
+                $strQuery = "DELETE FROM order_master WHERE ref_order_no = '". $orderNo ."'";
+                $this->db->query($strQuery);
+            }
+        }
+
+        $strQuery = "DELETE FROM order_master WHERE order_id IN (". $orderId .")";
+        $res = $this->db->query($strQuery);
+        $this->Page->setFlashMessage("success", "challan deleted successfully");
+        echo $res;
+    }
 }
 
 /* End of file welcome.php */

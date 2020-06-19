@@ -33,7 +33,8 @@
 <script src="./js/date-time/bootstrap-datepicker.min.js"></script>
 <script src="./js/date-time/bootstrap-timepicker.min.js"></script>
 <script src="./js/jquery.form.js"></script>
-<script src="./js/jquery.dataTables.min.js"></script>
+<!--<script src="./js/jquery.dataTables.min.js"></script>-->
+<script src="./js/jquery.dataTables.1.10.19.min.js"></script>
 <script src="./js/jquery.dataTables.bootstrap.js"></script>
 <script src="./js/jquery.popupoverlay.js"></script>
 

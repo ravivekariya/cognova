@@ -81,7 +81,7 @@
                     <label class="control-label" for="form-field-4">Date</label>
 
                     <div class="controls">
-                        <input type="text" data-date-format="yyyy-mm-dd" id="txtOrderDate" name="txtOrderDate" class="date-picker span4 required" placeholder="dd-mm-yyyy" value="<?php echo ($strAction == "E") ? $orderDetailArr['order_date'] : ""; ?>">
+                        <input type="text" data-date-format="dd-mm-yyyy" id="txtOrderDate" name="txtOrderDate" class="date-picker span4 required" placeholder="dd-mm-yyyy" value="<?php echo ($strAction == "E") ? $orderDetailArr['order_date'] : ""; ?>">
                         <span class="add-on">
                         <i class="icon-calendar"></i>
                     </span>
@@ -148,7 +148,7 @@
                                     <?php } ?>
                                     <?php if ($type == "inward") { ?>
                                     <td class="span1">
-                                        <button id="btnOrderProdAdd" type="button" class="btn btn-remove btn-danger">
+                                        <button id="btnOrderProdAdd" type="button" class="btn btn-remove btn-danger" disabled>
                                             <span class="icon-minus bigger-110"></span></button>
                                     </td>
                                     <?php } ?>
@@ -213,13 +213,13 @@
                                                         ?>
                                                         <button class="btn btn-success btn-add" type="button"
                                                                 id="btnOrderProdAdd"><span
-                                                                class="icon-plus bigger-110"></span></button>
+                                                                class="icon-plus bigger-110" disabled></span></button>
                                                         <?php
                                                     } else {
                                                         ?>
                                                         <button id="btnOrderProdAdd" type="button"
                                                                 class="btn btn-remove btn-danger"><span
-                                                                class="icon-minus bigger-110"></span></button>
+                                                                class="icon-minus bigger-110" disabled></span></button>
                                                         <?php
                                                     }
                                                 ?>
@@ -240,7 +240,7 @@
                                             </select>
                                         </td>
                                         <td class="span2">
-                                            <select class="form-control chzn-select required" name="selProcess0"
+                                            <select class="form-control chzn-select required" name="selProcess"
                                                     id="selProcess0" multiple="" data-placeholder="Choose a Process...">
                                                 <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", ""); ?>
                                             </select>
@@ -260,7 +260,7 @@
                                         <?php } ?>
                                         <?php if ($type == "inward") { ?>
                                         <td class="span1">
-                                            <button class="btn btn-success btn-add" type="button" id="btnOrderProdAdd">
+                                            <button class="btn btn-success btn-add" type="button" id="btnOrderProdAdd" disabled>
                                                 <span class="icon-plus bigger-110"></span>
                                             </button>
                                         </td>
@@ -578,7 +578,7 @@ $(document).ready(function(){
 			var prod_id = $(this).find('select[name="selProduct"]').val();
 
             var inwardQty = null;
-            var proceedQty = null;
+            var proceedQty = 0;
 			if($(this).find('label[name="prodInwardQty"]').length > 0){
                 inwardQty = parseInt($(this).find('label[name="prodInwardQty"]').text());
             }
@@ -595,7 +595,7 @@ $(document).ready(function(){
 			productArr[trid]['prodTotalWeight'] = $(this).find('label[name="prodTotalWeight"]').text();
 
             // Check Qty exceed or not
-            if(inwardQty != null && proceedQty != null)
+            if(inwardQty != null)
             {
                 var totalQty =  proceedQty+productArr[trid]['prodQty'];
                 if(totalQty > inwardQty){
