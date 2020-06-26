@@ -224,7 +224,8 @@ function printContent(el){
 	document.body.innerHTML = printcontent;
 	window.print();
 	$('body').addClass('navbar-fixed');
-	document.body.innerHTML = restorepage;
+	//document.body.innerHTML = restorepage;
+	window.location.reload();
 }
 
 function replaceAll(str, find, replace) {
