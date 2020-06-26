@@ -35,6 +35,9 @@ class order extends CI_Controller {
         $type = $this->Page->getRequest("type");
         $draw = $this->input->post('draw');
 
+
+       // echo $this->Page->getRequest("Challan_No"); exit;
+
         // Get Order List
         $searchCriteria = array();
         $searchCriteria['type'] = $type;
@@ -47,33 +50,6 @@ class order extends CI_Controller {
 
         $this->order_model->searchCriteria = $searchCriteria;
         $orderListArr = $this->order_model->getInwardOrderList();
-
-        if($type == "outward"){
-            $challanNoA = array();
-            if($orderListArr["count"] > 0)
-            {
-                foreach($orderListArr["data"] AS $orderRow)
-                {
-                    $challanNoA[$orderRow["ref_order_no"]] = $orderRow["ref_order_no"];
-                }
-            }
-
-            // Get inward Qty
-            $searchCriteria = array();
-            $searchCriteria['type'] = "inward";
-            $searchCriteria['search_order'] = implode($challanNoA,",");
-            $this->order_model->searchCriteria = $searchCriteria;
-            $inwardOrderListArr = $this->order_model->getInwardOrderList();
-
-            $inwardQtyA = array();
-            if($inwardOrderListArr["count"] > 0)
-            {
-                foreach($inwardOrderListArr["data"] AS $orderRow)
-                {
-                    $inwardQtyA[$orderRow["order_no"]] = $orderRow["prod_qty"];
-                }
-            }
-        }
 
         // get process List
         $searchCriteria = ['status' => 'ACTIVE'];
@@ -121,12 +97,13 @@ class order extends CI_Controller {
                     $strEditLink	=	"index.php?c=order&m=createOrder&action=E&type=".$_REQUEST["type"]."&orderId=".$arrRecord['order_id'];
                     $data[] = array(
                         "ref_order_no" => $arrRecord['ref_order_no'],
+                        "outward_challan_no" => $arrRecord['outward_challan_no'],
                         "order_date" => $arrRecord['order_date'],
                         "prod_qty" =>  $arrRecord['prod_qty'],
                         "weight_per_qty" =>  $arrRecord['weight_per_qty'],
                         "prod_total_weight" =>  $arrRecord['prod_total_weight'],
                         "customer_challan_no" => $arrRecord['customer_challan_no'],
-                        "inward_qty" => $inwardQtyA[$arrRecord['ref_order_no']],
+                        "inward_qty" => $arrRecord['inward_qty'],
                         "customer_id" => $arrRecord['vendor_name'],
                         "prod_id" => $arrRecord['prod_name'],
                         "material_grade" =>  $arrRecord['material_grade'],
@@ -173,6 +150,7 @@ class order extends CI_Controller {
 			$rsListing['strAction'] = "E";
 			$rsListing['orderId'] = $orderId;
 			$rsListing['orderNo'] = $orderDetailArr['order_no'];
+			$rsListing['refOrderId'] = $orderDetailArr['orderProductDetailsArr'][0]['ref_order_id'];
 			$rsListing['orderDetailArr'] = $orderDetailArr;
 		}
 		else
@@ -192,6 +170,7 @@ class order extends CI_Controller {
                 }
 
                 $rsListing['orderDetailArr'] = $orderDetailArr;
+                $rsListing['refOrderId'] = $orderDetailArr['order_id'];
             }
 
 		    $rsListing['strAction'] = "A";
@@ -245,6 +224,7 @@ class order extends CI_Controller {
 	{
 		$strAction = $this->Page->getRequest("hdnAction");
 		$orderId = $this->Page->getRequest("hdnOrderId");
+		$hdnRefOrderId = $this->Page->getRequest("hdnRefOrderId");
 		$productArr = $_REQUEST["productArr"];
         $type = $this->Page->getRequest("hdnType");
 
@@ -282,6 +262,12 @@ class order extends CI_Controller {
                 $this->order_model->tbl = "order_track";
                 $this->order_model->insert(["order_id" => $orderId]);
             }
+
+            if($type == "outward"){
+                // save outward order ref. to generate challan no
+                $this->order_model->tbl = "outward_order_track";
+                $this->order_model->insert(["order_id" => $orderId]);
+            }
 		}
 		else
 		{
@@ -299,6 +285,8 @@ class order extends CI_Controller {
 		//$strQuery = "DELETE FROM order_product_detail WHERE order_id=".$orderId."";
 		//$this->db->query($strQuery);
 
+        //$this->Page->pr($productArr); exit;
+
 		// Add Order Product Details
 		if($orderId != "" && $orderId != 0)
 		{
@@ -307,6 +295,9 @@ class order extends CI_Controller {
 				// Order Product Detail Entry
 				$arrData = array();
 				$arrData['order_id'] = $orderId;
+				if($hdnRefOrderId && $type == "outward"){
+                    $arrData['ref_order_id'] = $hdnRefOrderId;
+                }
 				$arrData['prod_Id'] = $arr['prodId'];
 				$arrData['prod_qty'] = $arr['prodQty'];
 				$arrData['weight_per_qty'] = $arr['weightPerQty'];

@@ -46,24 +46,6 @@ class Inventory extends CI_Controller {
         $this->inventory_model->searchCriteria = $searchCriteria;
         $resultA = $this->inventory_model->getInwardOrderList();
 
-        $orderNoA = array();
-        if($resultA["count"] > 0)
-        {
-            foreach($resultA["data"] AS $row)
-            {
-                $orderNoA[] = $row["order_no"];
-            }
-        }
-
-        $resOutwardA = $this->inventory_model->getOutwardOrderList($orderNoA);
-
-        $outwardA = [];
-        if(count($resOutwardA)){
-            foreach ($resOutwardA AS $row){
-                $outwardA[$row["ref_order_no"]][$row["prod_id"]] = $row["total_qty"];
-            }
-        }
-
         // get process List
         $searchCriteria = ['status' => 'ACTIVE'];
         $this->process_model->searchCriteria = $searchCriteria;
@@ -81,7 +63,7 @@ class Inventory extends CI_Controller {
             foreach($resultA["data"] as $arrRecord)
             {
                 $inwardQty = $arrRecord['prod_qty'];
-                $outwardQty = $outwardA[$arrRecord['order_no']][$arrRecord['prod_id']];
+                $outwardQty = $arrRecord['total_outward_qty'];
                 $pendingQty = $inwardQty - $outwardQty;
 
                 $strProcess = "";
@@ -97,6 +79,7 @@ class Inventory extends CI_Controller {
 
                 $data[] = array(
                     "order_no" => $arrRecord['order_no'],
+                    "outward_challan_no" => $arrRecord['outward_challan_no'],
                     "order_date" => $arrRecord['order_date'],
                     "customer_id" => $arrRecord['vendor_name'],
                     "prod_id" => $arrRecord['prod_name'],

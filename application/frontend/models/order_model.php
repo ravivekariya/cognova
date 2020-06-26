@@ -101,7 +101,7 @@ class order_model extends Data {
 		$searchCriteria = array();
 		$searchCriteria = $this->searchCriteria;
 		
-		$selectField = "om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date";
+		$selectField = "om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,oot.id AS outward_challan_no";
 		if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
 		{
 			$selectField = 	$searchCriteria['selectField'];
@@ -160,7 +160,12 @@ class order_model extends Data {
 			$orderDir = $searchCriteria['orderDir'];
 		}
 
-		$sqlQuery = "SELECT ".$selectField." FROM order_master AS om ".$whereClaue."  ORDER BY ".$orderField." ".$orderDir."";
+		$sqlQuery = "SELECT ".$selectField." 
+		             FROM order_master AS om
+		             LEFT JOIN outward_order_track AS oot 
+		             ON om.order_id = oot.order_id
+		             ".$whereClaue."  
+		             ORDER BY ".$orderField." ".$orderDir."";
 		// echo $sqlQuery; exit;
 		
 		$result     = $this->db->query($sqlQuery);
@@ -353,16 +358,94 @@ class order_model extends Data {
             $whereClaue .= 	" AND om.order_no IN ('".$searchOrder."') ";
         }
 
-        // By From Date
-        if(isset($searchCriteria['from_date']) && $searchCriteria['from_date'] != "")
+        // By ref order no like
+        if($this->Page->getRequest("ref_order_no"))
         {
-            $whereClaue .= 	" AND om.order_date>='".$searchCriteria['from_date']."' ";
+            $whereClaue .= 	" AND om.ref_order_no LIKE '".$this->Page->getRequest("ref_order_no")."%' ";
         }
 
-        // By To date
-        if(isset($searchCriteria['to_date']) && $searchCriteria['to_date'] != "")
+        // By outward challan no
+        if($this->Page->getRequest("outward_challan_no"))
         {
-            $whereClaue .= 	" AND om.order_date<='".$searchCriteria['to_date']."' ";
+            $whereClaue .= 	" AND oot.id LIKE '".$this->Page->getRequest("outward_challan_no")."%' ";
+        }
+
+        // By order no like
+        if($this->Page->getRequest("order_no"))
+        {
+            $whereClaue .= 	" AND om.order_no LIKE '".$this->Page->getRequest("order_no")."%' ";
+        }
+
+        // By date
+        if($this->Page->getRequest("order_date"))
+        {
+            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') LIKE '%".$this->Page->getRequest("order_date")."%' ";
+        }
+
+        // By product
+        if($this->Page->getRequest("prod_id"))
+        {
+            $whereClaue .= 	" AND opd.prod_id = '".$this->Page->getRequest("prod_id")."' ";
+        }
+
+        // By customer
+        if($this->Page->getRequest("search_customer"))
+        {
+            $whereClaue .= 	" AND om.customer_id = '".$this->Page->getRequest("search_customer")."' ";
+        }
+
+        // By customer
+        if($this->Page->getRequest("customer_id"))
+        {
+            $whereClaue .= 	" AND om.customer_id = '".$this->Page->getRequest("customer_id")."' ";
+        }
+
+        // By Qty
+        if($this->Page->getRequest("prod_qty"))
+        {
+            $whereClaue .= 	" AND opd.prod_qty LIKE '".$this->Page->getRequest("prod_qty")."%' ";
+        }
+
+        // By Inward Qty
+        /*if($this->Page->getRequest("inward_qty"))
+        {
+            $whereClaue .= 	" AND inward_qty LIKE '".$this->Page->getRequest("inward_qty")."%' ";
+        }*/
+
+        // By Material grade
+        if($this->Page->getRequest("material_grade"))
+        {
+            $whereClaue .= 	" AND om.material_grade LIKE '%".$this->Page->getRequest("material_grade")."%' ";
+        }
+
+        // By specification
+        if($this->Page->getRequest("specification"))
+        {
+            $whereClaue .= 	" AND om.specification LIKE '%".$this->Page->getRequest("specification")."%' ";
+        }
+
+        // By Remarks
+        if($this->Page->getRequest("order_note"))
+        {
+            $whereClaue .= 	" AND om.order_note LIKE '%".$this->Page->getRequest("order_note")."%' ";
+        }
+
+        // By weight
+        if($this->Page->getRequest("weight"))
+        {
+            $whereClaue .= 	" AND opd.weight_per_qty LIKE '%".$this->Page->getRequest("weight")."%' ";
+        }
+
+        // By Total weight
+        if($this->Page->getRequest("total_weight"))
+        {
+            $whereClaue .= 	" AND opd.prod_total_weight LIKE '%".$this->Page->getRequest("total_weight")."%' ";
+        }
+
+        // By order no like
+        if($this->Page->getRequest("customer_challan_no"))
+        {
+            $whereClaue .= 	" AND om.customer_challan_no LIKE '%".$this->Page->getRequest("customer_challan_no")."%' ";
         }
 
         // By Order Type
@@ -417,7 +500,9 @@ class order_model extends Data {
             $limitClause = " LIMIT ".$searchCriteria['offset'].",".$searchCriteria['limit']." ";
         }
 
-        $sql = "SELECT om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date, opd.prod_id,opd.process_ids,opd.prod_qty,opd.weight_per_qty,opd.prod_total_weight,vm.vendor_name,pm.prod_name
+        $sql = "SELECT 
+                    om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date, opd.prod_id,opd.process_ids,opd.prod_qty,opd.weight_per_qty,opd.prod_total_weight,vm.vendor_name,pm.prod_name,oot.id AS outward_challan_no,
+                    (SELECT prod_qty FROM order_product_detail AS opdi WHERE opdi.order_id = opd.ref_order_id AND opdi.prod_id = opd.prod_id) AS inward_qty
                 FROM order_master AS om
                 LEFT JOIN order_product_detail AS opd
                 ON om.order_id = opd.order_id
@@ -425,6 +510,8 @@ class order_model extends Data {
                 ON om.customer_id = vm.vendor_id
                 LEFT JOIN product_master AS pm
                 ON opd.prod_id = pm.prod_id
+                LEFT JOIN outward_order_track AS oot 
+                ON om.order_id = oot.order_id
                 ".$whereClaue."
                 GROUP BY om.order_id,opd.prod_id
                 ORDER BY ".$orderField." ".$orderDir."";

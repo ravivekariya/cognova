@@ -17,6 +17,103 @@ class Inventory_model extends Data {
         $searchCriteria = $this->searchCriteria;
         $whereClaue = "";
 
+        // By Order
+        if(isset($searchCriteria['search_order']) && $searchCriteria['search_order'] != "")
+        {
+            $searchOrder = str_replace(",","','", $searchCriteria['search_order']);
+            $whereClaue .= 	" AND om.order_no IN ('".$searchOrder."') ";
+        }
+
+        // By ref order no like
+        if($this->Page->getRequest("ref_order_no"))
+        {
+            $whereClaue .= 	" AND om.ref_order_no LIKE '".$this->Page->getRequest("ref_order_no")."%' ";
+        }
+
+        // By order no like
+        if($this->Page->getRequest("order_no"))
+        {
+            $whereClaue .= 	" AND om.order_no LIKE '".$this->Page->getRequest("order_no")."%' ";
+        }
+
+        // By outward challan no
+        if($this->Page->getRequest("outward_challan_no"))
+        {
+            $whereClaue .= 	" AND oot.id LIKE '".$this->Page->getRequest("outward_challan_no")."%' ";
+        }
+
+        // By date
+        if($this->Page->getRequest("order_date"))
+        {
+            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') LIKE '%".$this->Page->getRequest("order_date")."%' ";
+        }
+
+        // By product
+        if($this->Page->getRequest("prod_id"))
+        {
+            $whereClaue .= 	" AND opd.prod_id = '".$this->Page->getRequest("prod_id")."' ";
+        }
+
+        // By customer
+        if($this->Page->getRequest("search_customer"))
+        {
+            $whereClaue .= 	" AND om.customer_id = '".$this->Page->getRequest("search_customer")."' ";
+        }
+
+        // By customer
+        if($this->Page->getRequest("customer_id"))
+        {
+            $whereClaue .= 	" AND om.customer_id = '".$this->Page->getRequest("customer_id")."' ";
+        }
+
+        // By Qty
+        if($this->Page->getRequest("prod_qty"))
+        {
+            $whereClaue .= 	" AND opd.prod_qty LIKE '".$this->Page->getRequest("prod_qty")."%' ";
+        }
+
+        // By Inward Qty
+        /*if($this->Page->getRequest("inward_qty"))
+        {
+            $whereClaue .= 	" AND inward_qty LIKE '".$this->Page->getRequest("inward_qty")."%' ";
+        }*/
+
+        // By Material grade
+        if($this->Page->getRequest("material_grade"))
+        {
+            $whereClaue .= 	" AND om.material_grade LIKE '%".$this->Page->getRequest("material_grade")."%' ";
+        }
+
+        // By specification
+        if($this->Page->getRequest("specification"))
+        {
+            $whereClaue .= 	" AND om.specification LIKE '%".$this->Page->getRequest("specification")."%' ";
+        }
+
+        // By Remarks
+        if($this->Page->getRequest("order_note"))
+        {
+            $whereClaue .= 	" AND om.order_note LIKE '%".$this->Page->getRequest("order_note")."%' ";
+        }
+
+        // By weight
+        if($this->Page->getRequest("weight"))
+        {
+            $whereClaue .= 	" AND opd.weight_per_qty LIKE '%".$this->Page->getRequest("weight")."%' ";
+        }
+
+        // By Total weight
+        if($this->Page->getRequest("total_weight"))
+        {
+            $whereClaue .= 	" AND opd.prod_total_weight LIKE '%".$this->Page->getRequest("total_weight")."%' ";
+        }
+
+        // By order no like
+        if($this->Page->getRequest("customer_challan_no"))
+        {
+            $whereClaue .= 	" AND om.customer_challan_no LIKE '%".$this->Page->getRequest("customer_challan_no")."%' ";
+        }
+
         // keyword search
         if(isset($searchCriteria['keyword']) && $searchCriteria['keyword'] != "")
         {
@@ -57,13 +154,20 @@ class Inventory_model extends Data {
             $limitClause = " LIMIT ".$searchCriteria['offset'].",".$searchCriteria['limit']." ";
         }
 
-        $sql = "SELECT om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name FROM order_master AS om
+        $sql = "SELECT 
+                    om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name,oot.id AS outward_challan_no,
+                    (SELECT SUM(opdi.prod_qty) FROM order_product_detail AS opdi WHERE opdi.ref_order_id = opd.order_id AND opdi.prod_id = opd.prod_id) AS total_outward_qty 
+                FROM order_master AS om
                 LEFT JOIN order_product_detail AS opd
                 ON om.order_id = opd.order_id
                 LEFT JOIN vendor_master AS vm
                 ON om.customer_id = vm.vendor_id
                 LEFT JOIN product_master AS pm
                 ON opd.prod_id = pm.prod_id
+                LEFT JOIN order_master AS otom
+                ON om.order_no = otom.ref_order_no
+                LEFT JOIN outward_order_track AS oot 
+                ON otom.order_id = oot.order_id
                 WHERE om.type = 'inward'
                 ".$whereClaue."
                 GROUP BY om.order_no,opd.prod_id";
@@ -76,29 +180,6 @@ class Inventory_model extends Data {
 
         $rsData['data'] = $result->result_array();
         $rsData['count'] = $count;
-
-        return $rsData;
-    }
-
-    public function getOutwardOrderList($orderNoA)
-    {
-        $strOrderNo = implode(",", $orderNoA);
-        $strOrderNo = str_replace(',','","', $strOrderNo);
-
-        $where = "";
-        if($strOrderNo){
-            $where .= ' AND ref_order_no IN ("'.$strOrderNo.'")';
-        }
-
-        $sql = "SELECT om.ref_order_no,opd.prod_id,SUM(opd.prod_qty) AS total_qty FROM order_master AS om
-                LEFT JOIN order_product_detail AS opd
-                ON om.order_id = opd.order_id
-                WHERE om.type = 'outward'
-                ".$where."
-                GROUP BY om.order_no,opd.prod_id";
-
-        $result     = $this->db->query($sql);
-        $rsData = $result->result_array();
 
         return $rsData;
     }

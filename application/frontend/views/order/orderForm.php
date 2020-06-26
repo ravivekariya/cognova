@@ -313,6 +313,7 @@
                 <div class="form-actions" align="left">
                     <button class="btn btn-info" type="submit"><i class="icon-ok bigger-110"></i>Submit</button>
                     <button class="btn" type="reset"><i class="icon-undo bigger-110"></i>Reset</button>
+                    <input type="hidden" name="hdnRefOrderId" id="hdnRefOrderId" value="<?php echo $refOrderId; ?>"/>
                     <input type="hidden" name="hdnOrderId" id="hdnOrderId" value="<?php echo $orderId; ?>"/>
                     <input type="hidden" name="hdnAction" id="hdnAction" value="<?php echo $strAction; ?>"/>
                     <input type="hidden" name="hdnType" id="hdnType" value="<?php echo $type; ?>"/>
@@ -634,6 +635,7 @@ $(document).ready(function(){
 		var param = {};
 		param['hdnAction'] = $("#hdnAction").val();
 		param['hdnOrderId'] = $("#hdnOrderId").val();
+		param['hdnRefOrderId'] = $("#hdnRefOrderId").val();
 		if($("#txtOrderNo").val() != undefined){
             param['txtOrderNo'] = $("#txtOrderNo").val();
         } else {

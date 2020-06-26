@@ -39,13 +39,13 @@
             <div class="widget-header widget-header-large">
                 <h3 class="grey lighter pull-left position-relative">
                     <!--<i class="icon-leaf green"></i>-->
-                    CHALLAN NO : <?php echo $orderDetailArr['order_no']; ?>
+                    CHALLAN NO : <?php echo $orderDetailArr['outward_challan_no']; ?>
                 </h3>
 
                 <div class="widget-toolbar hidden-480 div-icons non-printable">
-                    <a href="index.php?c=invoice&m=generatePdf&orderId=<?php echo $orderDetailArr['order_id']; ?>" target="_blank" title="PDF">
+                    <!--<a href="index.php?c=invoice&m=generatePdf&orderId=<?php /*echo $orderDetailArr['order_id']; */?>" target="_blank" title="PDF">
                         <i class="icon-file bigger-120"></i>
-                    </a>
+                    </a>-->
                     <!--<a href="index.php?c=invoice&m=generateMailForm&action=E&orderId=<?php echo $orderDetailArr['order_id']; ?>" title="Mail">
 							<i class="icon-envelope bigger-120"></i>
 						</a>-->
@@ -103,9 +103,9 @@
                                 <tr valign="top">
                                     <td width="55%">
                                         <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse; border-color:#000000;">
-                                            <tr valign="top" height="54">
+                                            <tr valign="top" height="81">
                                                 <td width="15%">M/s,</td>
-                                                <td><?php echo ucwords($vendorArr["vendor_comp_name"]); ?> </td>
+                                                <td><?php echo ucwords($vendorArr["vendor_name"]); ?> </td>
                                             </tr>
                                         </table>
                                     </td>
@@ -113,7 +113,11 @@
                                         <table width="100%" border="1" cellpadding="3" cellspacing="0" style="border-collapse:collapse; border:0px solid #000000;">
                                             <tr valign="top" height="25">
                                                 <td width="50%">Challan No.</td>
-                                                <td><?php echo $orderDetailArr['order_no']; ?></td>
+                                                <td><?php echo $orderDetailArr["outward_challan_no"]; ?></td>
+                                            </tr>
+                                            <tr valign="top" height="25">
+                                                <td width="50%">Cust. Challan No.</td>
+                                                <td><?php echo $orderDetailArr["customer_challan_no"]; ?></td>
                                             </tr>
                                             <tr height="25">
                                                 <td>Date:</td>
@@ -170,7 +174,7 @@
                                             <td><?php echo $prodRow["prod_qty"];  ?></td>
                                             <td><?php echo $prodRow["weight_per_qty"];  ?></td>
                                             <td><?php echo $prodRow["prod_total_weight"];  ?></td>
-                                            <td></td>
+                                            <td><?php echo $orderDetailArr["order_note"]; ?></td>
                                         </tr>
                                         </tr>
                                         <?php
@@ -178,7 +182,7 @@
                                     }
                                 }
 
-                                $remainCnt = 16-$cnt;
+                                $remainCnt = 15-$cnt;
 
                                 for($remainCnt; $remainCnt >=1; $remainCnt--)
                                 {

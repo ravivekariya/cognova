@@ -20,25 +20,6 @@ class invoice extends CI_Controller {
 		$orderId = $this->Page->getRequest("orderId");
 		$isPdf = $this->Page->getRequest("isPdf");
 
-		### Generate Invoice
-		// check invoice entry
-		$searchCriteria = array();
-		$searchCriteria['orderId'] = $orderId;
-		$this->invoice_model->searchCriteria = $searchCriteria;
-		$invoiceDetailArr = $this->invoice_model->getInvoiceDetails();
-		if(count($invoiceDetailArr) == 0)
-		{
-			// invoice entry
-			$arrData = array();
-			$arrData['invoice_no'] = $this->invoice_model->generateInvoiceNo();;
-			$arrData['order_id'] = $orderId;
-			$arrData['invoice_date'] = date("Y-m-d h:i:s");
-			$arrData['created_by'] = $this->Page->getSession("intUserId");
-
-			$this->invoice_model->tbl = "invoice";
-			$this->invoice_model->insert($arrData);
-		}
-
 		// generate process array
         $searchCriteria = array();
         $searchCriteria['selectField'] = 'pm.id, pm.name';
@@ -58,7 +39,7 @@ class invoice extends CI_Controller {
 		$searchCriteria = array();
 		$searchCriteria['order_id'] = $orderId;
 		$searchCriteria['fetchProductDetail'] = 1;
-		$searchCriteria['fetchOrderStatus'] = 1;
+		$searchCriteria['fetchOrderStatus'] = 0;
 		$this->order_model->searchCriteria = $searchCriteria;
 		$orderDetailArr = $this->order_model->getOrderDetails();
 		$orderDetailArr = $orderDetailArr[0];
@@ -70,6 +51,7 @@ class invoice extends CI_Controller {
 		$searchCriteria['vendorId'] = $orderDetailArr["customer_id"];
 		$this->vendor_model->searchCriteria = $searchCriteria;
 		$vendorArr = $this->vendor_model->getVendor();
+
 		$rsListing['vendorArr'] = $vendorArr[0];
 		$rsListing['totalAmountInWords'] = $this->page->convert_digit_to_words($orderDetailArr['final_total_amount']);
 		$rsListing['processA'] = $processA;

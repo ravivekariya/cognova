@@ -19,35 +19,51 @@
 	<br />
 	<div class="row-fluid">
 		<div class="span12">
+            <div id="search-product-container" class="hide">
+                <select class="form-control" name="prod_id" id="prod_id">
+                    <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
+                </select>
+            </div>
+            <div id="search-process-container" class="hide">
+                <select class="form-control" name="processIds" id="processIds" multiple="" data-placeholder="Choose a Process...">
+                    <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", ""); ?>
+                </select>
+            </div>
+            <div id="search-customer-container" class="hide">
+                <select class="form-control" name="customer_id" id="customer_id">
+                    <?php echo $this->Page->generateComboByTable("vendor_master", "vendor_id", "vendor_name", "", "where status='ACTIVE' order by vendor_name", "", "Select Customer"); ?>
+                </select>
+            </div>
 			<table width="100%" cellpadding="5" cellspacing="5" border="0" class="table table-striped table-bordered table-hover dataTable" id="tbl-order-list">
 				<thead>
-					<tr class="hdr">
+					<tr>
                         <?php if($type == "inward") { ?>
-                            <th>Challan No</th>
-                            <th>Date</th>
-                            <th>Customer Challan No</th>
-                            <th>Customer Name</th>
-                            <th>Part No</th>
-                            <th>Qty</th>
-                            <th>Material Grade</th>
-                            <th>Process Required</th>
-                            <th>Specification</th>
-                            <th>Remarks</th>
+                            <th search-field="order_no">Challan No</th>
+                            <th search-field="order_date">Date</th>
+                            <th search-field="customer_challan_no">Customer Challan No</th>
+                            <th search-field="customer_id">Customer Name</th>
+                            <th search-field="prod_id">Part No</th>
+                            <th search-field="prod_qty">Qty</th>
+                            <th search-field="material_grade">Material Grade</th>
+                            <th search-field="processIds">Process Required</th>
+                            <th search-field="specification">Specification</th>
+                            <th search-field="order_note">Remarks</th>
                             <th class="no-sort">Action</th>
                         <?php } else { ?>
-                            <th>Ref Challan No</th>
-                            <th>Date</th>
-                            <th>Dispatch Qty</th>
-                            <th>Cut Wt.</th>
-                            <th>Total Wt.</th>
-                            <th>Customer Challan No</th>
-                            <th>Inward Qty</th>
-                            <th>Customer Name</th>
-                            <th>Part No</th>
-                            <th>Material Grade</th>
-                            <th>Process Carried Out</th>
-                            <th>Specification</th>
-                            <th>Remarks</th>
+                            <th search-field="ref_order_no">Ref Challan No</th>
+                            <th search-field="outward_challan_no">Outward Challan No</th>
+                            <th search-field="order_date">Date</th>
+                            <th search-field="prod_qty">Dispatch Qty</th>
+                            <th search-field="weight">Cut Wt.</th>
+                            <th search-field="total_weight">Total Wt.</th>
+                            <th search-field="customer_challan_no">Customer Challan No</th>
+                            <th search-field="inward_qty">Inward Qty</th>
+                            <th search-field="customer_id">Customer Name</th>
+                            <th search-field="prod_id">Part No</th>
+                            <th search-field="material_grade">Material Grade</th>
+                            <th search-field="processIds">Process Carried Out</th>
+                            <th search-field="specification">Specification</th>
+                            <th search-field="order_note">Remarks</th>
                             <th>Action</th>
                         <?php } ?>
 					</tr>
@@ -167,6 +183,7 @@
         } else {
             columns = [
                 { "data": "ref_order_no"},
+                { "data": "outward_challan_no"},
                 { "data": "order_date", "orderable": false },
                 { "data": "prod_qty"},
                 { "data": "weight_per_qty"},
@@ -189,15 +206,60 @@
             "ajax": {
                 "url":"index.php?c=order&m=getOrderData",
                 "type": "POST",
-                "data":  jQuery.parseJSON( '<?php echo $searchParams; ?>' ),
+                /*"data":  jQuery.parseJSON( '<?php echo $searchParams; ?>' ),*/
+                "data":  function(data){
+                    data.type = type;
+                    $(".datatable-search").each(function () {
+                        var key = this.id;
+                        console.log(key);
+                        console.log($("#tbl-order-list #"+key).val());
+                        data[key] = $("#tbl-order-list #"+key).val();
+                    });
+                },
             },
             "columns": columns,
             /*"aoColumns": aoColumns,*/
             "iDisplayLength": 25,
-            "search": {
-                "regex": true
-            }
+            "searching": false
         });
+
+        $('#tbl-order-list thead tr').clone(true).appendTo( '#tbl-order-list thead' );
+        $('#tbl-order-list thead tr:eq(1) th').each( function (i) {
+            if($(this).hasClass("sorting")){
+                $(this).removeClass("sorting");
+                $(this).addClass("sorting_disabled");
+            }
+
+            var searchField = $(this).attr('search-field');
+            var title = $(this).text();
+            title = replaceAll(title, ".", "");
+
+            if(searchField == undefined){
+                $(this).html('');
+            }
+            else if(searchField == "prod_id"){
+                $(this).html($("#search-product-container").html());
+                $("#tbl-order-list #prod_id").addClass("chzn-select");
+                $("#tbl-order-list #prod_id").addClass("datatable-search");
+                $(".chzn-select").chosen();
+            } else if(searchField == "processIds"){
+                $(this).html($("#search-process-container").html());
+                $("#tbl-order-list #processIds").addClass("chzn-select");
+                $("#tbl-order-list #processIds").addClass("datatable-search");
+                $(".chzn-select").chosen();
+            } else if(searchField == "customer_id"){
+                $(this).html($("#search-customer-container").html());
+                $("#tbl-order-list #customer_id").addClass("chzn-select");
+                $("#tbl-order-list #customer_id").addClass("datatable-search");
+                $(".chzn-select").chosen();
+            } else {
+                $(this).html( '<input type="text" id="'+searchField+'" name="'+searchField+'" class="datatable-search" placeholder="'+title+'" />' );
+            }
+
+            $( 'input', this ).on( 'keyup change', function () {
+                oTable1.fnDraw();
+            });
+        } );
 	});
 
 	function loadViewOrder(orderId)
