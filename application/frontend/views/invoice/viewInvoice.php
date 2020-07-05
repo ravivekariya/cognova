@@ -69,7 +69,9 @@
                         <td>
                             <table width="100%" border="0" cellpadding="0" cellspacing="5" align="center">
                                 <tr>
-                                    <td height="30"></td>
+                                    <td height="30" align="center">
+                                        <img src="./img/cognova-logo.jpg" style="height:40px;" />
+                                    </td>
                                 </tr>
                                 <tr align="center">
                                     <td><strong>COGNOVA HEAT TREATMENT LLP</strong></td>

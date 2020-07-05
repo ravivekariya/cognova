@@ -186,10 +186,7 @@
                                                 </td>
                                             <?php } ?>
                                             <td class="span1">
-                                                <input class="form-control span12 required calc" type="text"
-                                                       name="txtProductQty" id="txtProductQty<?php echo $cnt; ?>"
-                                                       placeholder="QTY"
-                                                       value="<?php echo ($strAction == "E") ? $productRow['prod_qty'] : ""; ?>"/>
+                                                <input class="form-control span12 required calc" type="text" name="txtProductQty" id="txtProductQty<?php echo $cnt; ?>" saved-qty="<?php echo ($strAction == "E") ? $productRow['prod_qty'] : 0;  ?>" placeholder="QTY" value="<?php echo ($strAction == "E") ? $productRow['prod_qty'] : ""; ?>"/>
                                             </td>
 
                                             <?php if ($type == "outward") { ?>
@@ -588,6 +585,8 @@ $(document).ready(function(){
                 proceedQty = parseInt($(this).find('label[name="prodProceedQty"]').text());
             }
 
+            var savedQty =  parseInt($(this).find('input[name="txtProductQty"]').attr('saved-qty'));
+
 			productArr[trid] = {};
 			productArr[trid]['prodId'] = $(this).find('select[name="selProduct"]').val();
 			productArr[trid]['processIds'] = $(this).find('select[name="selProcess"]').val();
@@ -598,7 +597,7 @@ $(document).ready(function(){
             // Check Qty exceed or not
             if(inwardQty != null)
             {
-                var totalQty =  proceedQty+productArr[trid]['prodQty'];
+                var totalQty =  proceedQty+productArr[trid]['prodQty']-savedQty;
                 if(totalQty > inwardQty){
                     $("#txtProductQty"+trid).addClass("border-red");
                     qtyExceedError++;
