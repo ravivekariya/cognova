@@ -69,7 +69,7 @@ class order_model extends Data {
 		}
 		
 		$orderField = " order_id ";
-		$orderDir = " ASC";
+		$orderDir = " ASC"; 
 		
 		// Set Order Field
 		if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")
@@ -479,7 +479,7 @@ class order_model extends Data {
         }
 
         $orderField = " om.order_id ";
-        $orderDir = " ASC";
+        $orderDir = " DESC"; // Change ASC To DESC By Pramod
 
         // Set Order Field
         if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")
