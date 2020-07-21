@@ -35,6 +35,10 @@
 <script src="./js/jquery.form.js"></script>
 <!--<script src="./js/jquery.dataTables.min.js"></script>-->
 <script src="./js/jquery.dataTables.1.10.19.min.js"></script>
+<script src="./js/datatable/dataTables.buttons.min.js"></script>
+<script src="./js/datatable/buttons.flash.min.js"></script>
+<script src="./js/datatable/jszip.min.js"></script>
+<script src="./js/datatable/buttons.html5.min.js"></script>
 <script src="./js/jquery.dataTables.bootstrap.js"></script>
 <script src="./js/jquery.popupoverlay.js"></script>
 

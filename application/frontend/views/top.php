@@ -26,7 +26,9 @@
         <link rel="stylesheet" href="./css/ace.min.css" />
         <link rel="stylesheet" href="./css/ace-responsive.min.css" />
         <link rel="stylesheet" href="./css/ace-skins.min.css" />
-        
+        <!--<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" />-->
+        <link rel="stylesheet" href="./js/datatable/buttons.dataTables.min.css" />
+
         <link rel="stylesheet" href="./css/select2.css" />
         <link rel="stylesheet" href="./css/style.main.css" />
         <link rel="stylesheet" href="./css/customize.css" />
