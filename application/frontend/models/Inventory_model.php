@@ -43,9 +43,13 @@ class Inventory_model extends Data {
         }
 
         // By date
-        if($this->Page->getRequest("order_date"))
+        if($this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to"))
         {
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') LIKE '%".$this->Page->getRequest("order_date")."%' ";
+            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') BETWEEN '".$this->Page->getRequest("order_date_from")."' AND '".$this->Page->getRequest("order_date_to")."' ";
+        } else if($this->Page->getRequest("order_date_from") && !$this->Page->getRequest("order_date_to")){
+            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') >= '".$this->Page->getRequest("order_date_from")."' ";
+        } else if(!$this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to")){
+            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') <= '".$this->Page->getRequest("order_date_to")."' ";
         }
 
         // By product

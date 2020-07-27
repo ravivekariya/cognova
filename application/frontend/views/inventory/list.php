@@ -72,6 +72,51 @@
             }
         });
 
+        var oldExportAction = function (self, e, dt, button, config) {
+            if (button[0].className.indexOf('buttons-excel') >= 0) {
+                if ($.fn.dataTable.ext.buttons.excelHtml5.available(dt, config)) {
+                    $.fn.dataTable.ext.buttons.excelHtml5.action.call(self, e, dt, button, config);
+                }
+                else {
+                    $.fn.dataTable.ext.buttons.excelFlash.action.call(self, e, dt, button, config);
+                }
+            } else if (button[0].className.indexOf('buttons-print') >= 0) {
+                $.fn.dataTable.ext.buttons.print.action(e, dt, button, config);
+            }
+        };
+
+        var newExportAction = function (e, dt, button, config) {
+            var self = this;
+            var oldStart = dt.settings()[0]._iDisplayStart;
+
+            dt.one('preXhr', function (e, s, data) {
+                // Just this once, load all data from the server...
+                data.start = 0;
+                data.length = 2147483647;
+
+                dt.one('preDraw', function (e, settings) {
+                    // Call the original action function
+                    oldExportAction(self, e, dt, button, config);
+
+                    dt.one('preXhr', function (e, s, data) {
+                        // DataTables thinks the first item displayed is index 0, but we're not drawing that.
+                        // Set the property to what it was before exporting.
+                        settings._iDisplayStart = oldStart;
+                        data.start = oldStart;
+                    });
+
+                    // Reload the grid with the original page. Otherwise, API functions like table.cell(this) don't work properly.
+                    setTimeout(dt.ajax.reload, 0);
+
+                    // Prevent rendering of the full data to the DOM
+                    return false;
+                });
+            });
+
+            // Requery the server with the new one-time export settings
+            dt.ajax.reload();
+        };
+
         var columns = [];
 
         columns = [
@@ -108,8 +153,17 @@
             },
             "columns": columns,
             /*"aoColumns": aoColumns,*/
+            "lengthMenu": [25, 50,100,500],
             "iDisplayLength": 25,
-            "searching": false
+            "searching": false,
+            dom: 'lBfrtip',
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: '<span class="fa fa-file-excel-o"></span> Export to Excel',
+                    action: newExportAction
+                }
+            ],
         });
 
         $('#tbl-order-list thead tr').clone(true).appendTo( '#tbl-order-list thead' );
@@ -141,6 +195,9 @@
                 $("#tbl-order-list #customer_id").addClass("chzn-select");
                 $("#tbl-order-list #customer_id").addClass("datatable-search");
                 $(".chzn-select").chosen();
+            } else if(searchField == "order_date") {
+                $(this).html('<input type="text" id="' + searchField + '_from" name="' + searchField + '_from" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="From ' + title + '" /> <input type="text" id="' + searchField + '_to" name="' + searchField + '_to" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="To ' + title + '" />');
+                datePickerConfig();
             } else {
                 $(this).html( '<input type="text" id="'+searchField+'" name="'+searchField+'" class="datatable-search" placeholder="'+title+'" />' );
             }

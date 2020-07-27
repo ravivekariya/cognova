@@ -308,6 +308,9 @@
                 $("#tbl-order-list #customer_id").addClass("chzn-select");
                 $("#tbl-order-list #customer_id").addClass("datatable-search");
                 $(".chzn-select").chosen();
+            } else if(searchField == "order_date") {
+                $(this).html('<input type="text" id="' + searchField + '_from" name="' + searchField + '_from" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="From ' + title + '" /> <input type="text" id="' + searchField + '_to" name="' + searchField + '_to" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="To ' + title + '" />');
+                datePickerConfig();
             } else {
                 $(this).html( '<input type="text" id="'+searchField+'" name="'+searchField+'" class="datatable-search" placeholder="'+title+'" />' );
             }

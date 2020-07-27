@@ -1,17 +1,10 @@
 /* Common List and Validation functions and Common functions */
 
 $(document).ready(function() {
-	$('.date-picker').datepicker();
-	$(".date-picker").attr("autocomplete", "off");
-	/*$('.date-picker').datepicker().next().on(ace.click_event, function(){
-		$(this).prev().focus();
-	});*/
-	$('.date-picker').on('changeDate', function(ev){
-		$(this).datepicker('hide');
-	});
+	datePickerConfig();
 	$(".chzn-select").chosen();
 	$('[data-rel=popover]').popover({html:true});
-}); 
+});
 
 Array.prototype.contains = function (element) 
 {
@@ -24,6 +17,17 @@ Array.prototype.contains = function (element)
 	}
 	
 	return false;
+}
+
+function datePickerConfig(){
+	$('.date-picker').datepicker();
+	$(".date-picker").attr("autocomplete", "off");
+	/*$('.date-picker').datepicker().next().on(ace.click_event, function(){
+		$(this).prev().focus();
+	});*/
+	$('.date-picker').on('changeDate', function(ev){
+		$(this).datepicker('hide');
+	});
 }
 
 function trim(str)
