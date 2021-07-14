@@ -40,7 +40,11 @@ echo form_open('c=product', $attributes);
                     </th>
                     <th></th>
                     <th>Product Name</th>
-                    <th>Product Description</th>
+                    <th>Vendor</th>
+                    <th>Weight</th>
+                    <th>Grade</th>
+                    <th>Specification</th>
+                    <th>Description</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -62,6 +66,10 @@ echo form_open('c=product', $attributes);
                         echo '<td width="20" class="action-buttons" nowrap="nowrap">';
 						echo '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a>';
 						echo '<td>'. $arrRecord['prod_name'] .'</td>';
+						echo '<td>'. $arrRecord['vendor_name'] .'</td>';
+						echo '<td>'. $arrRecord['prod_weight'] .'</td>';
+						echo '<td>'. $arrRecord['prod_grade'] .'</td>';
+						echo '<td>'. $arrRecord['prod_specification'] .'</td>';
 						echo '<td>'. $arrRecord['prod_desc'] .'</td>';
 						echo '<td>'. $arrRecord['status'] .'</td>';														
                         echo '</tr>';
@@ -83,7 +91,7 @@ $(document).ready(function() {
 
 <?php if(count($rsProducts)> 0): ?>
 var oTable1 =	$('#pagelist_center').dataTable( {
-					"aoColumns": [{"bSortable": false}, {"bSortable": false},null, null, null ],
+					"aoColumns": [{"bSortable": false}, {"bSortable": false}, null, null, null, null, null, null, null ],
 					"iDisplayLength": 25,
 				});
 <?php endif; ?>

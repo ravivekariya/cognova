@@ -20,17 +20,17 @@
 	<div class="row-fluid">
 		<div class="span12">
             <div id="search-product-container" class="hide">
-                <select class="form-control" name="prod_id" id="prod_id">
+                <select class="form-control" name="prod_id" id="prod_id" style="width: 130px;">
                     <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
                 </select>
             </div>
             <div id="search-process-container" class="hide">
-                <select class="form-control" name="processIds" id="processIds" multiple="" data-placeholder="Choose a Process...">
+                <select class="form-control" style="width: 130px;" name="processIds" id="processIds" multiple="" data-placeholder="Choose a Process...">
                     <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", ""); ?>
                 </select>
             </div>
             <div id="search-customer-container" class="hide">
-                <select class="form-control" name="customer_id" id="customer_id">
+                <select class="form-control" name="customer_id" id="customer_id" style="width: 130px;">
                     <?php echo $this->Page->generateComboByTable("vendor_master", "vendor_id", "vendor_name", "", "where status='ACTIVE' order by vendor_name", "", "Select Customer"); ?>
                 </select>
             </div>
@@ -48,7 +48,6 @@
                             <th search-field="processIds">Process Required</th>
                             <th search-field="specification">Specification</th>
                             <th search-field="order_note">Remarks</th>
-                            <th class="no-sort">Action</th>
                         <?php } else { ?>
                             <th search-field="ref_order_no">Ref Challan No</th>
                             <th search-field="outward_challan_no">Outward Challan No</th>
@@ -64,8 +63,8 @@
                             <th search-field="processIds">Process Carried Out</th>
                             <th search-field="specification">Specification</th>
                             <th search-field="order_note">Remarks</th>
-                            <th>Action</th>
                         <?php } ?>
+                        <th>Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -309,10 +308,10 @@
                 $("#tbl-order-list #customer_id").addClass("datatable-search");
                 $(".chzn-select").chosen();
             } else if(searchField == "order_date") {
-                $(this).html('<input type="text" id="' + searchField + '_from" name="' + searchField + '_from" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="From ' + title + '" /> <input type="text" id="' + searchField + '_to" name="' + searchField + '_to" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="To ' + title + '" />');
+                $(this).html('<input type="text" style="width: 100px;" id="' + searchField + '_from" name="' + searchField + '_from" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="From ' + title + '" /> <input type="text" style="width: 100px;" id="' + searchField + '_to" name="' + searchField + '_to" data-date-format="dd-mm-yyyy" class="datatable-search date-picker" placeholder="To ' + title + '" />');
                 datePickerConfig();
             } else {
-                $(this).html( '<input type="text" id="'+searchField+'" name="'+searchField+'" class="datatable-search" placeholder="'+title+'" />' );
+                $(this).html( '<input type="text" style="width: 100px;" id="'+searchField+'" name="'+searchField+'" class="datatable-search" placeholder="'+title+'" />' );
             }
 
             $( 'input', this ).on( 'keyup change', function () {

@@ -17,7 +17,7 @@ class product_model extends Data {
 		$searchCriteria = array();
 		$searchCriteria = $this->searchCriteria;
 		
-		$selectField = "pm.*,pc.cat_name";
+		$selectField = "pm.*,pc.cat_name,vm.vendor_name";
 		if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
 		{
 			$selectField = 	$searchCriteria['selectField'];
@@ -42,6 +42,12 @@ class product_model extends Data {
 		{
 			$whereClaue .= 	" AND pm.prod_categoty=".$searchCriteria['cat_id']." ";
 		}
+
+        // By Vendor
+        if(isset($searchCriteria['vendor_id']) && $searchCriteria['vendor_id'] != "")
+        {
+            $whereClaue .= 	" AND pm.vendor_id=".$searchCriteria['vendor_id']." ";
+        }
 		
 		// By Status
 		if(isset($searchCriteria['status']) && $searchCriteria['status'] != "")
@@ -79,7 +85,10 @@ class product_model extends Data {
 		$sqlQuery = "SELECT 
 						".$selectField."
 					FROM 
-						product_master AS pm LEFT JOIN product_category AS pc ON pm.prod_categoty=pc.cat_id ".$whereClaue." ORDER BY ".$orderField." ".$orderDir."";
+						product_master AS pm 
+                    LEFT JOIN product_category AS pc ON pm.prod_categoty=pc.cat_id
+                    LEFT JOIN vendor_master AS vm ON pm.vendor_id=vm.vendor_id 
+                    ".$whereClaue." ORDER BY ".$orderField." ".$orderDir."";
 						
 		//echo $sqlQuery; exit;
 		

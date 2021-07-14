@@ -18,10 +18,31 @@ echo form_open('c=product&m=saveProduct', $attributes);
 <div class="row-fluid" id="printFrmDiv">
     <div class="span10">
         <fieldset>
-            <div class="control-group">
+			<div class="control-group">
                 <label for="form-field-1" class="control-label">Product Name <span class="red">*</span></label>
                 <div class="controls">
                     <input type="text" id="txt_prod_name" name="txt_prod_name" class="required span6" value="<?php echo $rsEdit->prod_name; ?>" />
+                </div>
+            </div>
+			
+            <div class="control-group">
+                <label for="form-field-1" class="control-label">Product Weight</label>
+                <div class="controls">
+                    <input type="text" id="txt_prod_weight" name="txt_prod_weight" class="span6" value="<?php echo $rsEdit->prod_weight; ?>" />
+                </div>
+            </div>
+			
+			<div class="control-group">
+                <label for="form-field-1" class="control-label">Product Grade</label>
+                <div class="controls">
+                    <input type="text" id="txt_prod_grade" name="txt_prod_grade" class="span6" value="<?php echo $rsEdit->prod_grade; ?>" />
+                </div>
+            </div>
+			
+			<div class="control-group">
+                <label for="form-field-1" class="control-label">Product Specification</label>
+                <div class="controls">
+                    <input type="text" id="txt_prod_spec" name="txt_prod_spec" class="span6" value="<?php echo $rsEdit->prod_specification; ?>" />
                 </div>
             </div>
             
@@ -29,6 +50,15 @@ echo form_open('c=product&m=saveProduct', $attributes);
                 <label for="form-field-1" class="control-label">Product Description</label>
                 <div class="controls">
                     <textarea type="text" id="txt_prod_desc" name="txt_prod_desc" class="span6" value=""><?php echo $rsEdit->prod_desc; ?></textarea>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="form-field-1" class="control-label">Vendor <span class="red">*</span></label>
+                <div class="controls">
+                    <select id="selCustomer" name="selCustomer" class="chzn-select">
+                        <?php echo $this->Page->generateComboByTable("vendor_master", "vendor_id", "vendor_name", "", "where status='ACTIVE' order by vendor_name", $rsEdit->vendor_id, "Select Customer"); ?>
+                    </select>
                 </div>
             </div>
             

@@ -80,7 +80,7 @@ class order extends CI_Controller {
 
                 if ($type == "inward") {
                     $strEditLink	=	"index.php?c=order&m=createOrder&action=E&type=".$_REQUEST["type"]."&orderId=".$arrRecord['order_id'];
-                    $data[] = array(
+                    $param = array(
                         "order_no" => $arrRecord['order_no'],
                         "order_date" => $arrRecord['order_date'],
                         "customer_challan_no" => $arrRecord['customer_challan_no'],
@@ -91,11 +91,16 @@ class order extends CI_Controller {
                         "process" => $strProcess,
                         "specification" => $arrRecord['specification'],
                         "order_note" => $arrRecord['order_note'],
-                        'actionLink' => '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a> <a href="javascript:void(0);" class="red delete" title="Delete" id="'.$arrRecord['order_id'].'"><i class="icon-trash bigger-130"></i></a>',
                     );
+
+                    $actionLink = '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a>';
+                    if ($this->Page->getSession("strUserType") != 7) {
+                        $actionLink .= ' <a href="javascript:void(0);" class="red delete" title="Delete" id="'.$arrRecord['order_id'].'"><i class="icon-trash bigger-130"></i></a> <a href="index.php?c=invoice&m=generateInvoice&orderId='.$arrRecord['order_id'].'&type='.$type.'" class="blue" title="Invoice"><i class="icon-save bigger-130"></i></a>';
+                    }
+                    $param['actionLink'] = $actionLink;
                 } else {
                     $strEditLink	=	"index.php?c=order&m=createOrder&action=E&type=".$_REQUEST["type"]."&orderId=".$arrRecord['order_id'];
-                    $data[] = array(
+                    $param = array(
                         "ref_order_no" => $arrRecord['ref_order_no'],
                         "outward_challan_no" => $arrRecord['outward_challan_no'],
                         "order_date" => $arrRecord['order_date'],
@@ -109,10 +114,16 @@ class order extends CI_Controller {
                         "material_grade" =>  $arrRecord['material_grade'],
                         "process" => $strProcess,
                         "specification" => $arrRecord['specification'],
-                        "order_note" => $arrRecord['order_note'],
-                        'actionLink' => '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a> <a href="javascript:void(0);" class="red delete" title="Delete" id="'.$arrRecord['order_id'].'"><i class="icon-trash bigger-130"></i></a> <a href="index.php?c=invoice&m=generateInvoice&orderId='.$arrRecord['order_id'].'" class="blue" title="Invoice"><i class="icon-save bigger-130"></i></a>',
+                        "order_note" => $arrRecord['order_note']
                     );
+
+                    $actionLink = '<a href="'.$strEditLink.'" class="green" title="Edit"><i class="icon-pencil bigger-130"></i></a>';
+                    if ($this->Page->getSession("strUserType") != 7) {
+                        $actionLink .= '<a href="javascript:void(0);" class="red delete" title="Delete" id="'.$arrRecord['order_id'].'"><i class="icon-trash bigger-130"></i></a> <a href="index.php?c=invoice&m=generateInvoice&orderId='.$arrRecord['order_id'].'&type='.$type.'" class="blue" title="Invoice"><i class="icon-save bigger-130"></i></a>';
+                    }
+                    $param['actionLink'] = $actionLink;
                 }
+                $data[] = $param;
             }
         }
 
@@ -239,6 +250,7 @@ class order extends CI_Controller {
 		if($this->Page->getRequest("txtOrderRefNo")){
             $arrData['ref_order_no'] = $this->Page->getRequest("txtOrderRefNo");
         }
+
 		$arrData['order_date'] = date('Y-m-d',strtotime($this->Page->getRequest("txtOrderDate")));
 		$arrData['customer_id'] = $this->Page->getRequest("selCustomer");
 		$arrData['customer_challan_no'] = $this->Page->getRequest("txtCustChallanNo");
@@ -247,8 +259,9 @@ class order extends CI_Controller {
 		$arrData['sub_total_amount'] = $this->Page->getRequest("subTotal");
 		$arrData['order_status'] = "pending";
 		$arrData['order_note'] = $this->Page->getRequest("txtNote");
+		$arrData['delivery_date'] = date('Y-m-d',strtotime($this->Page->getRequest("txtDeliveryDate")));
 		$arrData['type'] = $type;
-
+		
 		if($strAction == "A")
 		{
 			$arrData['insertby']	=	$this->Page->getSession("intUserId");
@@ -285,8 +298,6 @@ class order extends CI_Controller {
 		//$strQuery = "DELETE FROM order_product_detail WHERE order_id=".$orderId."";
 		//$this->db->query($strQuery);
 
-        //$this->Page->pr($productArr); exit;
-
 		// Add Order Product Details
 		if($orderId != "" && $orderId != 0)
 		{
@@ -319,7 +330,7 @@ class order extends CI_Controller {
 
                     $whereArr = array();
                     $whereArr['order_id'] = $orderId;
-                    $whereArr['prod_id'] = $arr['prodId'];
+                    $whereArr['opd_id'] = $arr['opdId'];
 
                     $this->order_model->tbl = "order_product_detail";
                     $this->order_model->update($arrData, $whereArr);
@@ -519,6 +530,19 @@ class order extends CI_Controller {
         $this->Page->setFlashMessage("success", "challan deleted successfully");
         echo $res;
     }
+	
+	// Get Product details
+	public function getProductDetails()
+	{
+		$productId = $this->input->get('prod_id');
+		
+		$searchCriteria	=	array();
+		$searchCriteria['prod_id'] = $productId;
+		$this->product_model->searchCriteria = $searchCriteria;
+		$rsProduct = $this->product_model->getProduct();
+		
+		echo json_encode($rsProduct[0]);
+	}
 }
 
 /* End of file welcome.php */

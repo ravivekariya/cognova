@@ -226,8 +226,42 @@ function printContent(el){
 	var printcontent = document.getElementById(el).innerHTML;
 	console.log(printcontent);
 	document.body.innerHTML = printcontent;
+
 	window.print();
 	$('body').addClass('navbar-fixed');
+	//document.body.innerHTML = restorepage;
+	window.location.reload();
+}
+function printChallanContent(el){
+	$('body').removeClass('navbar-fixed');
+	$("#print-challan .page").css('transform','rotate(90deg)');
+	$("#print-challan .subpage,body.navbar-fixed").css('margin','0');
+	$("#print-challan .subpage,body.navbar-fixed").css('padding','0');
+	var restorepage = document.body.innerHTML;
+	$(".non-printable").hide();
+	var printcontent = document.getElementById(el).innerHTML;
+	console.log(printcontent);
+	document.body.innerHTML = printcontent;
+
+	window.print();
+	//$('body').addClass('navbar-fixed');
+	//document.body.innerHTML = restorepage;
+	window.location.reload();
+}
+function printInwardChallanContent(el){
+	$('body').removeClass('navbar-fixed');
+	$("#print-challan .page").css('transform','rotate(90deg)');
+	$("#print-challan .subpage,body.navbar-fixed").css('margin','0');
+	$("#print-challan .subpage").css('padding-left','315px');
+	$("body.navbar-fixed").css('padding','0');
+	var restorepage = document.body.innerHTML;
+	$(".non-printable").hide();
+	var printcontent = document.getElementById(el).innerHTML;
+	console.log(printcontent);
+	document.body.innerHTML = printcontent;
+
+	window.print();
+	//$('body').addClass('navbar-fixed');
 	//document.body.innerHTML = restorepage;
 	window.location.reload();
 }

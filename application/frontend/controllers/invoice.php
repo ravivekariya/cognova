@@ -19,6 +19,7 @@ class invoice extends CI_Controller {
 	{
 		$orderId = $this->Page->getRequest("orderId");
 		$isPdf = $this->Page->getRequest("isPdf");
+        $type = $this->Page->getRequest("type");
 
 		// generate process array
         $searchCriteria = array();
@@ -44,7 +45,11 @@ class invoice extends CI_Controller {
 		$orderDetailArr = $this->order_model->getOrderDetails();
 		$orderDetailArr = $orderDetailArr[0];
 		$rsListing['orderDetailArr'] = $orderDetailArr;
-		//$this->Page->pr($orderDetailArr); exit;
+		
+		// get Total Inward and processed(Outward) qty.
+        if($orderDetailArr["ref_order_no"]){
+            $proceedQtyA = $this->order_model->getInwardQtyDetails($orderDetailArr["ref_order_no"]);
+        }
 
 		// Get Customer Details
 		$searchCriteria = array();
@@ -55,9 +60,17 @@ class invoice extends CI_Controller {
 		$rsListing['vendorArr'] = $vendorArr[0];
 		$rsListing['totalAmountInWords'] = $this->page->convert_digit_to_words($orderDetailArr['final_total_amount']);
 		$rsListing['processA'] = $processA;
+		$rsListing['proceedQtyA'] = $proceedQtyA;
 
 		if($isPdf != 1){
-			$this->load->view('invoice/viewInvoice', $rsListing);
+		    if($type == "inward"){
+		        /*echo '<pre>';
+		        print_r($rsListing);
+                echo '/<pre>';*/
+                $this->load->view('invoice/viewInwardInvoice', $rsListing);
+            } else {
+                $this->load->view('invoice/viewInvoice', $rsListing);
+            }
 		}
 		else{
 			$this->load->view('invoice/viewPdfHtml', $rsListing);

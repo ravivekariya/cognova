@@ -69,7 +69,7 @@ class order_model extends Data {
 		}
 		
 		$orderField = " order_id ";
-		$orderDir = " ASC"; 
+		$orderDir = " ASC";
 		
 		// Set Order Field
 		if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")
@@ -101,7 +101,7 @@ class order_model extends Data {
 		$searchCriteria = array();
 		$searchCriteria = $this->searchCriteria;
 		
-		$selectField = "om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,oot.id AS outward_challan_no,DATE_FORMAT(om.delivery_date, '%d-%m-%Y') AS delivery_date";
+		$selectField = "om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,oot.id AS outward_challan_no";
 		if(isset($searchCriteria['selectField']) && $searchCriteria['selectField'] != "")
 		{
 			$selectField = 	$searchCriteria['selectField'];
@@ -377,13 +377,9 @@ class order_model extends Data {
         }
 
         // By date
-        if($this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to"))
+        if($this->Page->getRequest("order_date"))
         {
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') BETWEEN '".$this->Page->getRequest("order_date_from")."' AND '".$this->Page->getRequest("order_date_to")."' ";
-        } else if($this->Page->getRequest("order_date_from") && !$this->Page->getRequest("order_date_to")){
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') >= '".$this->Page->getRequest("order_date_from")."' ";
-        } else if(!$this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to")){
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') <= '".$this->Page->getRequest("order_date_to")."' ";
+            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') LIKE '%".$this->Page->getRequest("order_date")."%' ";
         }
 
         // By product
@@ -483,7 +479,7 @@ class order_model extends Data {
         }
 
         $orderField = " om.order_id ";
-        $orderDir = " DESC"; // Change ASC To DESC By Pramod
+        $orderDir = " ASC";
 
         // Set Order Field
         if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")

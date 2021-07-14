@@ -247,6 +247,38 @@ class Page extends CI_Model {
 		
 		return $retstr;
 	}
+
+    // Display combobox options with selected from database table
+    function generateOrderProductCombo($Selected="")
+    {
+        $selectedArr = array();
+        if($Selected != "")
+        {
+            $selectedArr = explode(",",$Selected);
+        }
+
+        $retstr="<option value=''>Select Product</option>";
+        $sqlQuery = "SELECT pm.prod_id AS prod_id,CONCAT(pm.prod_name,IF(vm.vendor_name IS NULL, '', '('),IFNULL(vm.vendor_name,''),IF(vm.vendor_name IS NULL, '', ')')) AS prod_name  FROM product_master AS pm LEFT JOIN vendor_master AS vm ON pm.vendor_id = vm.vendor_id WHERE pm.status = 'ACTIVE';";
+        $result     = $this->db->query($sqlQuery);
+        $rsData     = $result->result_array();
+
+        foreach($rsData as $arrRec)
+        {
+            $Val=$arrRec['prod_id'];
+            $Data=$arrRec['prod_name'];
+            if(count($selectedArr) > 0 && in_array($Val,$selectedArr)){
+                $sel="selected";
+            }
+            else
+            {
+                $sel="";
+            }
+
+            $retstr.="<option value='$Val' $sel>$Data</option>";
+        }
+
+        return $retstr;
+    }
 	
 	function getEmailTemplate($strTempalteType)
 	{

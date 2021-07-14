@@ -64,6 +64,7 @@ class product extends CI_Controller {
 		$searchCriteria = array(); 
 		$searchCriteria["selectField"] = "pm.prod_id";
 		$searchCriteria["prod_name"] = $this->Page->getRequest('txt_prod_name');
+		$searchCriteria["vendor_id"] = $this->Page->getRequest('selCustomer');
 		if ($strAction == 'E')
 		{
             $searchCriteria["not_id"] = $prod_id;
@@ -77,9 +78,13 @@ class product extends CI_Controller {
 		}
 
         $arrHeader["prod_name"]     	=	$this->Page->getRequest('txt_prod_name');
+        $arrHeader["prod_weight"]     	=	$this->Page->getRequest('txt_prod_weight');
+        $arrHeader["prod_grade"]     	=	$this->Page->getRequest('txt_prod_grade');
+        $arrHeader["prod_specification"]     	=	$this->Page->getRequest('txt_prod_spec');
 		$arrHeader["prod_desc"]        =   $this->Page->getRequest('txt_prod_desc');
 		$arrHeader["status"]        	= 	$this->Page->getRequest('slt_status');
-		
+		$arrHeader["vendor_id"]        	= 	$this->Page->getRequest('selCustomer');
+
 		if ($strAction == 'A' || $strAction == 'R')
 		{
             $arrHeader['insertby']		=	$this->Page->getSession("intUserId");

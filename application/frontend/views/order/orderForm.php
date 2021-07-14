@@ -60,28 +60,10 @@
                 </div>
 
                 <div class="control-group">
-                    <label class="control-label" for="form-input-readonly">Material Grade</label>
-
-                    <div class="controls">
-                        <input type="text" class="span4" id="txtMaterialGrade" name="txtMaterialGrade"
-                               value="<?php echo $orderDetailArr['material_grade']; ?>"/>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="form-input-readonly">Specification</label>
-
-                    <div class="controls">
-                        <input type="text" class="span4" id="txtSpec" name="txtSpec"
-                               value="<?php echo $orderDetailArr['specification']; ?>"/>
-                    </div>
-                </div>
-
-                <div class="control-group">
                     <label class="control-label" for="form-field-4">Date</label>
 
                     <div class="controls">
-                        <input type="text" data-date-format="dd-mm-yyyy" id="txtOrderDate" name="txtOrderDate" class="date-picker span4 required" placeholder="dd-mm-yyyy" value="<?php echo ($strAction == "E") ? $orderDetailArr['order_date'] : ""; ?>">
+                        <input type="text" id="txtOrderDate" name="txtOrderDate" class="date-picker span4 required" placeholder="dd-mm-yyyy" value="<?php echo ($strAction == "E") ? $orderDetailArr['order_date'] : ""; ?>">
                         <span class="add-on">
                         <i class="icon-calendar"></i>
                     </span>
@@ -108,12 +90,11 @@
                                     <?php if ($type == "outward") { ?>
                                         <th class="span2">Inward Qty</th>
                                         <th class="span1">Proceed Qty</th>
+                                        <th class="span1">Procee Remain Qty</th>
                                     <?php } ?>
                                     <th class="span1">Quantity</th>
-                                    <?php if ($type == "outward") { ?>
-                                        <th class="span2">Weight</th>
-                                        <th class="span1">Total weight</th>
-                                    <?php } ?>
+                                    <th class="span2">Weight</th>
+                                    <th class="span1">Total weight</th>
                                     <?php if ($type == "inward") { ?>
                                     <th class="span1">Action</th>
                                     <?php } ?>
@@ -125,7 +106,8 @@
                                     <td class="span2">
                                         <select class="form-control product calc" name="selProduct"
                                                 id="selProduct">
-                                            <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
+                                            <?php // echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
+                                            <?php echo $this->Page->generateOrderProductCombo(""); ?>
                                         </select>
                                     </td>
                                     <td class="span2">
@@ -137,15 +119,13 @@
                                     <td class="span1">
                                         <input class="form-control span12 calc" type="text" name="txtProductQty"id="txtProductQty" placeholder="QTY"/>
                                     </td>
-                                    <?php if ($type == "outward") { ?>
-                                        <td class="span2">
-                                            <input class="form-control span12 calc" name="txtProductWeight"
-                                                   id="txtProductWeight" type="text" placeholder="INR"/>
-                                        </td>
-                                        <td class="span1">
-                                            <label id="prodTotalWeight" name="prodTotalWeight" class="span12">0.0</label>
-                                        </td>
-                                    <?php } ?>
+									<td class="span2">
+										<input class="form-control span12 calc" name="txtProductWeight"
+											   id="txtProductWeight" type="text" placeholder="INR"/>
+									</td>
+									<td class="span1">
+										<label id="prodTotalWeight" name="prodTotalWeight" class="span12">0.0</label>
+									</td>
                                     <?php if ($type == "inward") { ?>
                                     <td class="span1">
                                         <button id="btnOrderProdAdd" type="button" class="btn btn-remove btn-danger" disabled>
@@ -163,11 +143,12 @@
                                             $processIds = implode(",", json_decode($productRow['process_ids']));
                                         }
                                         ?>
-                                        <tr class="entry" id="<?php echo $cnt; ?>">
+                                        <tr class="entry" id="<?php echo $cnt; ?>" opd-id="<?php echo $productRow['opd_id']; ?>">
                                             <td class="span2">
                                                 <select class="form-control product calc chzn-select required" name="selProduct"
                                                         id="selProduct<?php echo $cnt; ?>">
-                                                    <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", $productRow['prod_id'], "Select Product"); ?>
+                                                    <?php // echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", $productRow['prod_id'], "Select Product"); ?>
+                                                    <?php echo $this->Page->generateOrderProductCombo($productRow['prod_id']); ?>
                                                 </select>
                                             </td>
                                             <td class="span2">
@@ -184,25 +165,31 @@
                                                 <td class="span1">
                                                     <label id="prodProceedQty<?php echo $cnt; ?>"name="prodProceedQty"class="span12"><?php echo $proceedQtyA['outwardProceedQtyA'][$productRow['prod_id']]; ?></label>
                                                 </td>
+                                                <td class="span1">
+                                                    <label id="prodProceedRemainQty<?php echo $cnt; ?>"name="prodProceedRemainQty"class="span12">
+                                                        <?php 
+                                                            $inwardQty  = $proceedQtyA['inwardQtyA'][$productRow['prod_id']];
+                                                            $ProceedQty = $proceedQtyA['outwardProceedQtyA'][$productRow['prod_id']]; 
+                                                            echo $inwardQty - $ProceedQty;
+                                                        ?>
+                                                    </label>
+                                                </td>
                                             <?php } ?>
                                             <td class="span1">
                                                 <input class="form-control span12 required calc" type="text" name="txtProductQty" id="txtProductQty<?php echo $cnt; ?>" saved-qty="<?php echo ($strAction == "E") ? $productRow['prod_qty'] : 0;  ?>" placeholder="QTY" value="<?php echo ($strAction == "E") ? $productRow['prod_qty'] : ""; ?>"/>
-                                            </td>
-
-                                            <?php if ($type == "outward") { ?>
-                                                <td class="span2">
-                                                    <input class="form-control span12 required calc"
-                                                           name="txtProductWeight"
-                                                           id="txtProductWeight<?php echo $cnt; ?>" type="text"
-                                                           placeholder="INR"
-                                                           value="<?php echo $productRow['weight_per_qty']; ?>"/>
-                                                </td>
-                                                <td class="span1">
-                                                    <label id="prodTotalWeight<?php echo $cnt; ?>"
-                                                           name="prodTotalWeight"
-                                                           class="span12"><?php echo $productRow['prod_total_weight']; ?></label>
-                                                </td>
-                                            <?php } ?>
+                                            </td>                                            
+											<td class="span2">
+												<input class="form-control span12 required calc"
+													   name="txtProductWeight"
+													   id="txtProductWeight<?php echo $cnt; ?>" type="text"
+													   placeholder="INR"
+													   value="<?php echo $productRow['weight_per_qty']; ?>"/>
+											</td>
+											<td class="span1">
+												<label id="prodTotalWeight<?php echo $cnt; ?>"
+													   name="prodTotalWeight"
+													   class="span12"><?php echo $productRow['prod_total_weight']; ?></label>
+											</td>
                                             <?php if ($type == "inward") { ?>
                                             <td class="span1">
                                                 <?php
@@ -233,7 +220,8 @@
                                             <!--<input class="form-control span12 required calc" type="text" name="txtProduct" id="txtProduct0" placeholder="Item" />-->
                                             <select class="form-control product calc chzn-select required" name="selProduct"
                                                     id="selProduct0">
-                                                <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
+                                                <?php // echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
+                                                <?php echo $this->Page->generateOrderProductCombo(""); ?>
                                             </select>
                                         </td>
                                         <td class="span2">
@@ -245,16 +233,14 @@
                                         <td class="span1">
                                             <input class="form-control span12 required calc" type="text" name="txtProductQty" id="txtProductQty0" placeholder="QTY"/>
                                         </td>
-                                        <?php if ($type == "outward") { ?>
-                                            <td class="span2">
-                                                <input class="form-control span12 required calc" name="txtProductWeight"
-                                                       id="txtProductWeight0" type="text" placeholder="INR"/>
-                                            </td>
-                                            <td class="span1">
-                                                <label id="prodTotalWeight0" name="prodTotalWeight"
-                                                       class="span12">0.0</label>
-                                            </td>
-                                        <?php } ?>
+										<td class="span2">
+											<input class="form-control span12 required calc" name="txtProductWeight"
+												   id="txtProductWeight0" type="text" placeholder="INR"/>
+										</td>
+										<td class="span1">
+											<label id="prodTotalWeight0" name="prodTotalWeight"
+												   class="span12">0.0</label>
+										</td>
                                         <?php if ($type == "inward") { ?>
                                         <td class="span1">
                                             <button class="btn btn-success btn-add" type="button" id="btnOrderProdAdd" disabled>
@@ -297,7 +283,35 @@
                     </div>
                 </div>
                 <!-- END ITEM DETAILS -->
+				
+				<div class="control-group">
+                    <label class="control-label" for="form-input-readonly">Material Grade</label>
 
+                    <div class="controls">
+                        <input type="text" class="span4" id="txtMaterialGrade" name="txtMaterialGrade"
+                               value="<?php echo $orderDetailArr['material_grade']; ?>"/>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="form-input-readonly">Specification</label>
+
+                    <div class="controls">
+                        <input type="text" class="span4" id="txtSpec" name="txtSpec"
+                               value="<?php echo $orderDetailArr['specification']; ?>"/>
+                    </div>
+                </div>
+                <?php if($type == "inward"){ ?>
+                <div class="control-group">
+                    <label class="control-label" for="form-input-readonly">Delivery Date</label>
+                    <div class="controls">
+                        <input type="text" id="txtDeliveryDate" name="txtDeliveryDate" class="date-picker span4" placeholder="dd-mm-yyyy" value="<?php echo ($strAction == "E") ? $orderDetailArr['delivery_date'] : ""; ?>">
+                        <span class="add-on">
+                            <i class="icon-calendar"></i>
+                        </span>
+                    </div>
+                </div>
+				<?php } ?>
                 <div class="control-group">
                     <label class="control-label" for="form-input-readonly">Note</label>
 
@@ -306,6 +320,7 @@
                     </div>
                 </div>
 
+                <?php if($this->Page->getSession("strUserType") != 7) { ?>
                 <!-- START BUTTON SECTION -->
                 <div class="form-actions" align="left">
                     <button class="btn btn-info" type="submit"><i class="icon-ok bigger-110"></i>Submit</button>
@@ -316,6 +331,7 @@
                     <input type="hidden" name="hdnType" id="hdnType" value="<?php echo $type; ?>"/>
                 </div>
                 <!-- END BUTTON SECTION -->
+                <?php } ?>
             <?php
             }
             ?>
@@ -573,6 +589,7 @@ $(document).ready(function(){
 		var qtyExceedError = 0;
 		$('table.tbl-item-dtl tbody tr.entry').each(function(){
 			var trid = $(this).attr('id');
+			var opdid = $(this).attr('opd-id');
 			var prod_id = $(this).find('select[name="selProduct"]').val();
 
             var inwardQty = null;
@@ -588,6 +605,7 @@ $(document).ready(function(){
             var savedQty =  parseInt($(this).find('input[name="txtProductQty"]').attr('saved-qty'));
 
 			productArr[trid] = {};
+			productArr[trid]['opdId'] = opdid;
 			productArr[trid]['prodId'] = $(this).find('select[name="selProduct"]').val();
 			productArr[trid]['processIds'] = $(this).find('select[name="selProcess"]').val();
 			productArr[trid]['prodQty'] = parseInt($(this).find('input[name="txtProductQty"]').val());
@@ -646,6 +664,7 @@ $(document).ready(function(){
 		param['txtMaterialGrade'] = $("#txtMaterialGrade").val();
 		param['txtSpec'] = $("#txtSpec").val();
 		param['txtOrderDate'] = $("#txtOrderDate").val();
+        param['txtDeliveryDate'] = $("#txtDeliveryDate").val();
 		param['txtNote'] = $("#txtNote").val();
 		param['subTotal'] = $("#lblSubTotal").text();
 		param['hdnType'] = $("#hdnType").val();
@@ -751,6 +770,34 @@ $(document).ready(function(){
     });
     /* END Save Product */
 });
+
+/* START Get product details */
+$(document).on("change","#selProduct0",function(e){
+	e.preventDefault();
+	
+	if($("#hdnType").val() == "inward")
+	{
+		var param = {};
+		param['prod_id'] = $(this).val();
+
+		$.ajax({
+			type:"GET",
+			data:param,
+			dataType: "json",
+			url:"index.php?c=order&m=getProductDetails",
+			success:function(res)
+			{
+				$("#txtMaterialGrade").val(res.prod_grade);
+				$("#txtProductWeight0").val(res.prod_weight);
+				$("#txtSpec").val(res.prod_specification);
+				
+				$(".calc").blur();
+			}
+		});
+	}
+});
+/* END Get product details */
+
 
 function loadOutwardChallanForm() {
     var refOrderNo = $("#txtOrderRefNo").val();

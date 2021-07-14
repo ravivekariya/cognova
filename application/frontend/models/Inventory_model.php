@@ -137,7 +137,14 @@ class Inventory_model extends Data {
         }
 
         $orderField = " om.order_id ";
-        $orderDir = " ASC";
+        $orderDir = "  DESC";
+
+        $orderBy = '';
+        // Set Default Order By
+        if(!isset($searchCriteria['orderField']) && $searchCriteria['orderField'] == "")
+        {
+            $orderBy .=  "  ORDER BY `om`.`order_id` DESC";
+        }
 
         // Set Order Field
         if(isset($searchCriteria['orderField']) && $searchCriteria['orderField'] != "")
@@ -158,7 +165,7 @@ class Inventory_model extends Data {
             $limitClause = " LIMIT ".$searchCriteria['offset'].",".$searchCriteria['limit']." ";
         }
 
-        $sql = "SELECT 
+        /*$sql = "SELECT
                     om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name,oot.id AS outward_challan_no,
                     (SELECT SUM(opdi.prod_qty) FROM order_product_detail AS opdi WHERE opdi.ref_order_id = opd.order_id AND opdi.prod_id = opd.prod_id) AS total_outward_qty 
                 FROM order_master AS om
@@ -174,7 +181,23 @@ class Inventory_model extends Data {
                 ON otom.order_id = oot.order_id
                 WHERE om.type = 'inward'
                 ".$whereClaue."
-                GROUP BY om.order_no,opd.prod_id";
+                GROUP BY om.order_no,opd.prod_id";*/
+
+        $sql = "SELECT 
+                    om.order_id,om.order_no,om.customer_challan_no, om.order_note,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name
+                FROM order_master AS om
+                LEFT JOIN order_product_detail AS opd
+                ON om.order_id = opd.order_id
+                LEFT JOIN vendor_master AS vm
+                ON om.customer_id = vm.vendor_id
+                LEFT JOIN product_master AS pm
+                ON opd.prod_id = pm.prod_id
+                WHERE om.type = 'inward'
+                ".$whereClaue."
+                GROUP BY om.order_no,opd.prod_id
+                ".$orderBy."";
+
+        //echo $sql; exit;
 
         $result     = $this->db->query($sql);
         $count = count($result->result_array());
@@ -421,5 +444,26 @@ class Inventory_model extends Data {
         $rsData     = $result->result_array();
 
         return $rsData;
+    }
+
+    //Author : Nikunj Bambhroliya
+    //Description : return get outward qty sum
+    public function getOutwardQtySum($orderId, $productId){
+        $sql = "SELECT SUM(opdi.prod_qty) as total_outward_qty FROM order_product_detail AS opdi WHERE opdi.ref_order_id = ".$orderId." AND opdi.prod_id = ".$productId."";
+
+        $result     = $this->db->query($sql);
+        return $result->result_array();
+    }
+
+    //Author : Nikunj Bambhroliya
+    //Description : return get outward qty sum
+    public function getOutwardChallanNo($refOrderNo){
+        $sql = "SELECT oot.id AS outward_challan_no FROM order_master AS om
+                LEFT JOIN outward_order_track AS oot
+                    ON om.order_id = oot.order_id
+                WHERE om.ref_order_no = '".$refOrderNo."'";
+
+        $result     = $this->db->query($sql);
+        return $result->result_array();
     }
 }

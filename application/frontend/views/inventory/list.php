@@ -29,18 +29,18 @@
             <table width="100%" cellpadding="5" cellspacing="5" border="0" class="table table-striped table-bordered table-hover dataTable" id="tbl-order-list">
                 <thead>
                 <tr class="hdr">
-                    <th search-field="order_no">Challan No</th>
-                    <th search-field="outward_challan_no">Outward Challan No</th>
-                    <th search-field="order_date">Inward Date</th>
-                    <th search-field="customer_id">Customer Name</th>
-                    <th search-field="prod_id">Part</th>
-                    <th search-field="processIds">Process</th>
-                    <th search-field="prod_qty">Inward Qty</th>
-                    <th search-field="customer_challan_no">Customer Challan No</th>
-                    <th search-field="outward_qty">Outward Qty.</th>
-                    <th search-field="pending_qty">Pending Qty.</th>
+                    <th width="5%" search-field="order_no">Challan No</th>
+                    <th width="5%" search-field="outward_challan_no">Outward Challan No</th>
+                    <th width="10%" search-field="order_date">Inward Date</th>
+                    <th width="15%" search-field="customer_id">Customer Name</th>
+                    <th width="15%" search-field="prod_id">Part</th>
+                    <th width="15%" search-field="processIds">Process</th>
+                    <th width="5%" search-field="prod_qty">Inward Qty</th>
+                    <th width="5%" search-field="customer_challan_no">Customer Challan No</th>
+                    <th width="5%" search-field="outward_qty">Outward Qty.</th>
+                    <th width="5%" search-field="pending_qty">Pending Qty.</th>
                     <!--<th>Pending From(Days)</th>-->
-                    <th search-field="order_note">Remarks</th>
+                    <th width="15%" search-field="order_note">Remarks</th>
                 </tr>
                 </thead>
                 <tbody>

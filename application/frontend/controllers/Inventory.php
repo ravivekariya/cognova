@@ -63,7 +63,11 @@ class Inventory extends CI_Controller {
             foreach($resultA["data"] as $arrRecord)
             {
                 $inwardQty = $arrRecord['prod_qty'];
-                $outwardQty = $arrRecord['total_outward_qty'];
+                $rsOutwardQty = $this->inventory_model->getOutwardQtySum($arrRecord['order_id'], $arrRecord['prod_id']);
+                $rsOutwardChallanNo = $this->inventory_model->getOutwardChallanNo($arrRecord['order_no']);
+                $outwardQty = $rsOutwardQty[0]['total_outward_qty'];
+                //$outwardQty = $arrRecord['total_outward_qty'];
+                $outwardChallanNo = $rsOutwardChallanNo[0]['outward_challan_no'];
                 $pendingQty = $inwardQty - $outwardQty;
 
                 $strProcess = "";
@@ -79,7 +83,8 @@ class Inventory extends CI_Controller {
 
                 $data[] = array(
                     "order_no" => $arrRecord['order_no'],
-                    "outward_challan_no" => $arrRecord['outward_challan_no'],
+                    //"outward_challan_no" => $arrRecord['outward_challan_no'],
+                    "outward_challan_no" => $outwardChallanNo,
                     "order_date" => $arrRecord['order_date'],
                     "customer_id" => $arrRecord['vendor_name'],
                     "prod_id" => $arrRecord['prod_name'],
