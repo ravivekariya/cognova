@@ -45,17 +45,23 @@ class Inventory_model extends Data {
         // By date
         if($this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to"))
         {
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') BETWEEN '".$this->Page->getRequest("order_date_from")."' AND '".$this->Page->getRequest("order_date_to")."' ";
+            $whereClaue .= 	" AND om.order_date BETWEEN '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_from")))."' AND '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_to")))."' ";
         } else if($this->Page->getRequest("order_date_from") && !$this->Page->getRequest("order_date_to")){
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') >= '".$this->Page->getRequest("order_date_from")."' ";
+            $whereClaue .= 	" AND om.order_date >= '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_from")))."' ";
         } else if(!$this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to")){
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') <= '".$this->Page->getRequest("order_date_to")."' ";
+            $whereClaue .= 	" AND om.order_date <= '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_to")))."' ";
         }
 
         // By product
         if($this->Page->getRequest("prod_id"))
         {
-            $whereClaue .= 	" AND opd.prod_id = '".$this->Page->getRequest("prod_id")."' ";
+            $productA = $this->Page->getRequest("prod_id");
+
+            if(is_array($productA) && !empty($productA)){
+                $whereClaue .= 	" AND opd.prod_id IN (".implode(",",$productA).") ";
+            } else {
+                $whereClaue .= 	" AND opd.prod_id = '".$this->Page->getRequest("prod_id")."' ";
+            }
         }
 
         // By customer
@@ -74,6 +80,28 @@ class Inventory_model extends Data {
         if($this->Page->getRequest("prod_qty"))
         {
             $whereClaue .= 	" AND opd.prod_qty LIKE '".$this->Page->getRequest("prod_qty")."%' ";
+        }
+
+        // By processIds
+        if($this->Page->getRequest("processIds"))
+        {
+            $processA = $this->Page->getRequest("processIds");
+
+            if(is_array($processA) && !empty($processA)){
+                $tempA = [];
+                foreach ($processA AS $processId){
+                    $tempA[] = "opd.process_ids REGEXP '[[:<:]]{$processId}[[:>:]]'";
+                }
+
+                if(count($tempA) > 0){
+                    $tempS = implode(" OR ", $tempA);
+
+                    $whereClaue .= " AND (".$tempS.")";
+                }
+
+            } else {
+                $whereClaue .= 	" AND opd.process_ids REGEXP '[[:<:]]{$this->Page->getRequest("processIds")}[[:>:]]' ";
+            }
         }
 
         // By Inward Qty
@@ -184,7 +212,7 @@ class Inventory_model extends Data {
                 GROUP BY om.order_no,opd.prod_id";*/
 
         $sql = "SELECT 
-                    om.order_id,om.order_no,om.customer_challan_no, om.order_note,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name
+                    om.order_id,om.order_no,om.customer_challan_no, om.order_note,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date,opd.prod_id,opd.process_ids,opd.prod_qty,vm.vendor_name,pm.prod_name,oot.id AS outward_challan_no
                 FROM order_master AS om
                 LEFT JOIN order_product_detail AS opd
                 ON om.order_id = opd.order_id
@@ -192,6 +220,10 @@ class Inventory_model extends Data {
                 ON om.customer_id = vm.vendor_id
                 LEFT JOIN product_master AS pm
                 ON opd.prod_id = pm.prod_id
+                LEFT JOIN order_master AS otom
+                ON om.order_no = otom.ref_order_no
+                LEFT JOIN outward_order_track AS oot 
+                ON otom.order_id = oot.order_id
                 WHERE om.type = 'inward'
                 ".$whereClaue."
                 GROUP BY om.order_no,opd.prod_id

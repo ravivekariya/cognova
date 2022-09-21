@@ -89,8 +89,8 @@
                                     <th class="span2">Process</th>
                                     <?php if ($type == "outward") { ?>
                                         <th class="span2">Inward Qty</th>
-                                        <th class="span1">Proceed Qty</th>
-                                        <th class="span1">Procee Remain Qty</th>
+                                        <th class="span1">Dispatch Qty</th>
+                                        <th class="span1">Pending Qty</th>
                                     <?php } ?>
                                     <th class="span1">Quantity</th>
                                     <th class="span2">Weight</th>
@@ -323,7 +323,7 @@
                 <?php if($this->Page->getSession("strUserType") != 7) { ?>
                 <!-- START BUTTON SECTION -->
                 <div class="form-actions" align="left">
-                    <button class="btn btn-info" type="submit"><i class="icon-ok bigger-110"></i>Submit</button>
+                    <button class="btn btn-info" type="submit" id="orderFormSubmit"><i class="icon-ok bigger-110"></i>Submit</button>
                     <button class="btn" type="reset"><i class="icon-undo bigger-110"></i>Reset</button>
                     <input type="hidden" name="hdnRefOrderId" id="hdnRefOrderId" value="<?php echo $refOrderId; ?>"/>
                     <input type="hidden" name="hdnOrderId" id="hdnOrderId" value="<?php echo $orderId; ?>"/>
@@ -470,6 +470,15 @@
                             <div class="controls">
                                 <select class="required span8" name="slt_status" id="slt_status" >
                                     <?php echo $this->Page->generateComboByTable("combo_master","combo_key","combo_value",0," where combo_case='STATUS' order by seq","",""); ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="form-field-1" class="control-label">Vendor <span class="red">*</span></label>
+                            <div class="controls">
+                                <select id="selCustomer" name="selCustomer" class="">
+                                    <?php echo $this->Page->generateComboByTable("vendor_master", "vendor_id", "vendor_name", "", "where status='ACTIVE' order by vendor_name", "", "Select Customer"); ?>
                                 </select>
                             </div>
                         </div>
@@ -648,6 +657,8 @@ $(document).ready(function(){
 		{
 			return false;
 		}
+
+        $("#orderFormSubmit").attr("disabled", true);
 		
 		var param = {};
 		param['hdnAction'] = $("#hdnAction").val();
@@ -683,7 +694,8 @@ $(document).ready(function(){
 				}
 				else
 				{
-					alert("Data not saved property please try again!"); return false;
+                    $("#orderFormSubmit").attr("disabled", false);
+				    alert("Data not saved property please try again!"); return false;
 				}
 			}
 		})

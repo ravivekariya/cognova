@@ -20,13 +20,13 @@
 	<div class="row-fluid">
 		<div class="span12">
             <div id="search-product-container" class="hide">
-                <select class="form-control" name="prod_id" id="prod_id" style="width: 130px;">
+                <select class="form-control" name="prod_id" id="prod_id" style="width: 130px;" multiple>
                     <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
                 </select>
             </div>
             <div id="search-process-container" class="hide">
-                <select class="form-control" style="width: 130px;" name="processIds" id="processIds" multiple="" data-placeholder="Choose a Process...">
-                    <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", ""); ?>
+                <select class="form-control" style="width: 130px;" name="processIds" id="processIds" data-placeholder="Choose a Process..." multiple>
+                    <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", "Select Process"); ?>
                 </select>
             </div>
             <div id="search-customer-container" class="hide">
@@ -44,6 +44,8 @@
                             <th search-field="customer_id">Customer Name</th>
                             <th search-field="prod_id">Part No</th>
                             <th search-field="prod_qty">Qty</th>
+                            <th search-field="weight">Cut Wt.</th>
+                            <th search-field="total_weight">Total Wt.</th>
                             <th search-field="material_grade">Material Grade</th>
                             <th search-field="processIds">Process Required</th>
                             <th search-field="specification">Specification</th>
@@ -218,6 +220,8 @@
                 { "data": "customer_id" },
                 { "data": "prod_id" },
                 { "data": "prod_qty" },
+                { "data": "weight_per_qty"},
+                { "data": "prod_total_weight"},
                 { "data": "material_grade" },
                 { "data": "process" },
                 { "data": "specification" },
@@ -315,6 +319,10 @@
             }
 
             $( 'input', this ).on( 'keyup change', function () {
+                oTable1.fnDraw();
+            });
+
+            $( 'select', this ).on( 'change', function () {
                 oTable1.fnDraw();
             });
         } );

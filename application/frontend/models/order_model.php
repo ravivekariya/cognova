@@ -379,17 +379,23 @@ class order_model extends Data {
         // By date
         if($this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to"))
         {
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') BETWEEN '".$this->Page->getRequest("order_date_from")."' AND '".$this->Page->getRequest("order_date_to")."' ";
+            $whereClaue .= 	" AND om.order_date BETWEEN '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_from")))."' AND '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_to")))."' ";
         } else if($this->Page->getRequest("order_date_from") && !$this->Page->getRequest("order_date_to")){
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') >= '".$this->Page->getRequest("order_date_from")."' ";
+            $whereClaue .= 	" AND om.order_date >= '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_from")))."' ";
         } else if(!$this->Page->getRequest("order_date_from") && $this->Page->getRequest("order_date_to")){
-            $whereClaue .= 	" AND DATE_FORMAT(om.order_date, '%d-%m-%Y') <= '".$this->Page->getRequest("order_date_to")."' ";
+            $whereClaue .= 	" AND om.order_date <= '".date("Y-m-d", strtotime($this->Page->getRequest("order_date_to")))."' ";
         }
 
         // By product
         if($this->Page->getRequest("prod_id"))
         {
-            $whereClaue .= 	" AND opd.prod_id = '".$this->Page->getRequest("prod_id")."' ";
+            $productA = $this->Page->getRequest("prod_id");
+
+            if(is_array($productA) && !empty($productA)){
+                $whereClaue .= 	" AND opd.prod_id IN (".implode(",",$productA).") ";
+            } else {
+                $whereClaue .= 	" AND opd.prod_id = '".$this->Page->getRequest("prod_id")."' ";
+            }
         }
 
         // By customer
@@ -402,6 +408,28 @@ class order_model extends Data {
         if($this->Page->getRequest("customer_id"))
         {
             $whereClaue .= 	" AND om.customer_id = '".$this->Page->getRequest("customer_id")."' ";
+        }
+
+        // By processIds
+        if($this->Page->getRequest("processIds"))
+        {
+            $processA = $this->Page->getRequest("processIds");
+
+            if(is_array($processA) && !empty($processA)){
+                $tempA = [];
+                foreach ($processA AS $processId){
+                    $tempA[] = "opd.process_ids REGEXP '[[:<:]]{$processId}[[:>:]]'";
+                }
+
+                if(count($tempA) > 0){
+                   $tempS = implode(" OR ", $tempA);
+
+                    $whereClaue .= " AND (".$tempS.")";
+                }
+
+            } else {
+                $whereClaue .= 	" AND opd.process_ids REGEXP '[[:<:]]{$this->Page->getRequest("processIds")}[[:>:]]' ";
+            }
         }
 
         // By Qty
@@ -506,7 +534,12 @@ class order_model extends Data {
 
         $sql = "SELECT 
                     om.*,DATE_FORMAT(om.order_date, '%d-%m-%Y') AS order_date, opd.prod_id,opd.process_ids,opd.prod_qty,opd.weight_per_qty,opd.prod_total_weight,vm.vendor_name,pm.prod_name,oot.id AS outward_challan_no,
-                    (SELECT prod_qty FROM order_product_detail AS opdi WHERE opdi.order_id = opd.ref_order_id AND opdi.prod_id = opd.prod_id) AS inward_qty
+                    (SELECT prod_qty FROM order_product_detail AS opdi WHERE opdi.order_id = opd.ref_order_id AND opdi.prod_id = opd.prod_id) AS inward_qty,
+                      (SELECT 
+                        DATE_FORMAT(om2.order_date, '%d-%m-%Y') 
+                      FROM
+                        order_master AS om2 
+                      WHERE om.ref_order_no = om2.order_no AND om2.type = 'inward' LIMIT 1) AS inward_date
                 FROM order_master AS om
                 LEFT JOIN order_product_detail AS opd
                 ON om.order_id = opd.order_id
@@ -519,7 +552,7 @@ class order_model extends Data {
                 ".$whereClaue."
                 GROUP BY om.order_id,opd.prod_id
                 ORDER BY ".$orderField." ".$orderDir."";
-
+        //echo $sql; exit;
         $result     = $this->db->query($sql);
         $count = count($result->result_array());
 

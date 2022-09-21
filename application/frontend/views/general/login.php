@@ -32,7 +32,7 @@
                                         <fieldset>
                                             <label>
                                             <span class="block input-icon input-icon-right">
-                                            <input id="txtUsername" name="txtUsername" type="text" class="span12 required" placeholder="Username" />
+                                            <input id="txtUsername" name="txtUsername" type="text" class="span12 required" placeholder="Username" autocomplete="off" />
                                             <i class="icon-user"></i>
                                             </span>
                                             </label>

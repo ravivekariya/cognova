@@ -87,6 +87,8 @@ class order extends CI_Controller {
                         "customer_id" => $arrRecord['vendor_name'],
                         "prod_id" => $arrRecord['prod_name'],
                         "prod_qty" =>  $arrRecord['prod_qty'],
+                        "weight_per_qty" =>  $arrRecord['weight_per_qty'],
+                        "prod_total_weight" =>  number_format((float)$arrRecord['prod_total_weight'], 3, '.', ''),
                         "material_grade" =>  $arrRecord['material_grade'],
                         "process" => $strProcess,
                         "specification" => $arrRecord['specification'],
@@ -106,7 +108,7 @@ class order extends CI_Controller {
                         "order_date" => $arrRecord['order_date'],
                         "prod_qty" =>  $arrRecord['prod_qty'],
                         "weight_per_qty" =>  $arrRecord['weight_per_qty'],
-                        "prod_total_weight" =>  $arrRecord['prod_total_weight'],
+                        "prod_total_weight" =>  number_format((float)$arrRecord['prod_total_weight'], 3, '.', ''),
                         "customer_challan_no" => $arrRecord['customer_challan_no'],
                         "inward_qty" => $arrRecord['inward_qty'],
                         "customer_id" => $arrRecord['vendor_name'],
@@ -238,6 +240,10 @@ class order extends CI_Controller {
 		$hdnRefOrderId = $this->Page->getRequest("hdnRefOrderId");
 		$productArr = $_REQUEST["productArr"];
         $type = $this->Page->getRequest("hdnType");
+
+        if(!$type){
+            echo "2"; exit;
+        }
 
 		$cnt = 0;
 		// Order Master Entry

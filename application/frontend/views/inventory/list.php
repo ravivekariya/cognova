@@ -12,13 +12,13 @@
     <div class="row-fluid">
         <div class="span12">
             <div id="search-product-container" class="hide">
-                <select class="form-control" name="prod_id" id="prod_id">
+                <select class="form-control" name="prod_id" id="prod_id" multiple>
                     <?php echo $this->Page->generateComboByTable("product_master", "prod_id", "prod_name", "", "where status='ACTIVE'", "", "Select Product"); ?>
                 </select>
             </div>
             <div id="search-process-container" class="hide">
-                <select class="form-control" name="processIds" id="processIds" multiple="" data-placeholder="Choose a Process...">
-                    <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", ""); ?>
+                <select class="form-control" name="processIds" id="processIds" data-placeholder="Choose a Process..." multiple>
+                    <?php echo $this->Page->generateComboByTable("process", "id", "name", "", "where status='ACTIVE'", "", "Select Process"); ?>
                 </select>
             </div>
             <div id="search-customer-container" class="hide">
@@ -29,7 +29,7 @@
             <table width="100%" cellpadding="5" cellspacing="5" border="0" class="table table-striped table-bordered table-hover dataTable" id="tbl-order-list">
                 <thead>
                 <tr class="hdr">
-                    <th width="5%" search-field="order_no">Challan No</th>
+                    <th width="5%" search-field="order_no">Ref Challan No</th>
                     <th width="5%" search-field="outward_challan_no">Outward Challan No</th>
                     <th width="10%" search-field="order_date">Inward Date</th>
                     <th width="15%" search-field="customer_id">Customer Name</th>

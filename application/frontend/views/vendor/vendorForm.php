@@ -24,23 +24,23 @@ echo form_open('c=vendor&m=saveVendor', $attributes);
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">Company Name <span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">Company Name</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_comp_name" name="txt_vendor_comp_name" class="required span6" value="<?php echo $rsEdit->vendor_comp_name; ?>" />
+                    <input type="text" id="txt_vendor_comp_name" name="txt_vendor_comp_name" class="span6" value="<?php echo $rsEdit->vendor_comp_name; ?>" />
                 </div>
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">Phone No.<span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">Phone No.</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_phone" name="txt_vendor_phone" class="span6 required" value="<?php echo $rsEdit->vendor_phone; ?>" />
+                    <input type="text" id="txt_vendor_phone" name="txt_vendor_phone" class="span6" value="<?php echo $rsEdit->vendor_phone; ?>" />
                 </div>
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">Vendor Email<span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">Vendor Email</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_email" name="txt_vendor_email" class="span6 required isemail" value="<?php echo $rsEdit->vendor_email; ?>" />
+                    <input type="text" id="txt_vendor_email" name="txt_vendor_email" class="span6 isemail" value="<?php echo $rsEdit->vendor_email; ?>" />
                 </div>
             </div>            
                        
@@ -52,30 +52,30 @@ echo form_open('c=vendor&m=saveVendor', $attributes);
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">City<span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">City</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_city" name="txt_vendor_city" class="span6 required" value="<?php echo $rsEdit->vendor_city; ?>" />
+                    <input type="text" id="txt_vendor_city" name="txt_vendor_city" class="span6" value="<?php echo $rsEdit->vendor_city; ?>" />
                 </div>
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">State<span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">State</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_state" name="txt_vendor_state" class="span6 required" value="<?php echo $rsEdit->vendor_state; ?>" />
+                    <input type="text" id="txt_vendor_state" name="txt_vendor_state" class="span6" value="<?php echo $rsEdit->vendor_state; ?>" />
                 </div>
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">Country<span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">Country</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_country" name="txt_vendor_country" class="span6 required" value="<?php echo $rsEdit->vendor_country; ?>" />
+                    <input type="text" id="txt_vendor_country" name="txt_vendor_country" class="span6" value="<?php echo $rsEdit->vendor_country; ?>" />
                 </div>
             </div>
             
             <div class="control-group">
-                <label for="form-field-1" class="control-label">Postal Code<span class="red">*</span></label>
+                <label for="form-field-1" class="control-label">Postal Code</label>
                 <div class="controls">
-                    <input type="text" id="txt_vendor_postal_code" name="txt_vendor_postal_code" class="span6 required" value="<?php echo $rsEdit->vendor_postal_code; ?>" />
+                    <input type="text" id="txt_vendor_postal_code" name="txt_vendor_postal_code" class="span6" value="<?php echo $rsEdit->vendor_postal_code; ?>" />
                 </div>
             </div>
             

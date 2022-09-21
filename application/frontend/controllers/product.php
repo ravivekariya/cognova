@@ -256,6 +256,7 @@ class product extends CI_Controller {
         $arrHeader["prod_name"]     	=	$this->Page->getRequest('txt_prod_name');
         $arrHeader["prod_desc"]        =   $this->Page->getRequest('txt_prod_desc');
         $arrHeader["status"]        	= 	$this->Page->getRequest('slt_status');
+        $arrHeader["vendor_id"]        	= 	$this->Page->getRequest('selCustomer');
         $arrHeader['insertby']		=	$this->Page->getSession("intUserId");
         $arrHeader['insertdate'] 		= 	date('Y-m-d H:i:s');
         $arrHeader['updatedate'] 		= 	date('Y-m-d H:i:s');
